@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modals — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Page-specific styles for Modals
+       ============================================================ */
+
+    /* --- Trigger buttons in demo blocks --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .btn-primary   { background: var(--primary);   color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-danger    { background: var(--danger);    color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success   { background: var(--success);   color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-outline   { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-outline:hover { background: rgba(99,102,241,0.08); }
+    .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.8rem; }
+
+    /* ============================================================
+       MODAL OVERLAY — base
+       ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ============================================================
+       1. Basic Modal
+       ============================================================ */
+    .modal-box {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+      box-shadow: var(--shadow-xl);
+    }
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      line-height: 1;
+      padding: 0.1rem 0.3rem;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition), background var(--transition);
+    }
+    .modal-close:hover { color: var(--text); background: var(--surface-2); }
+    .modal-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    /* ============================================================
+       2. Confirm Dialog
+       ============================================================ */
+    .confirm-box {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 380px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+    }
+    .modal-overlay.open .confirm-box { transform: scale(1); }
+    .confirm-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.75rem;
+    }
+    .confirm-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .confirm-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .confirm-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       3. Fullscreen Modal
+       ============================================================ */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--surface);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      overflow-y: auto;
+    }
+    .fullscreen-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .fullscreen-inner {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(30px);
+      transition: transform 0.3s;
+    }
+    .fullscreen-overlay.open .fullscreen-inner { transform: translateY(0); }
+    .fullscreen-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+    .fullscreen-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .fullscreen-content {
+      flex: 1;
+      padding: 3rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .fullscreen-content h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .fullscreen-content p {
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    /* ============================================================
+       4. Slide-in Drawer (right)
+       ============================================================ */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 400px;
+      max-width: 95vw;
+      background: var(--surface);
+      box-shadow: var(--shadow-xl);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      z-index: 2001;
+    }
+    .drawer-overlay.open .drawer-panel { transform: translateX(0); }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .drawer-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+    .drawer-body p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .drawer-list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    .drawer-list-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .drawer-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    /* ============================================================
+       5. Bottom Sheet
+       ============================================================ */
+    .bottom-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .bottom-sheet-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .bottom-sheet-panel {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      box-shadow: var(--shadow-xl);
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0.5rem 1.5rem 2rem;
+    }
+    .bottom-sheet-overlay.open .bottom-sheet-panel { transform: translateY(0); }
+    .bottom-sheet-handle {
+      width: 48px;
+      height: 5px;
+      background: var(--gray-300);
+      border-radius: var(--radius-full);
+      margin: 0.75rem auto 1.25rem;
+    }
+    .bottom-sheet-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .bottom-sheet-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .bsa-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.9rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: none;
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+    .bsa-item:hover { background: var(--surface-2); border-color: var(--primary); }
+    .bsa-icon { font-size: 1.4rem; }
+    .bottom-sheet-cancel {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+    .bottom-sheet-cancel:hover { color: var(--text); border-color: var(--gray-400); }
+
+    /* ============================================================
+       6. Image Lightbox
+       ============================================================ */
+    .lightbox-thumbnails {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .lb-thumb {
+      width: 90px;
+      height: 70px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .lb-thumb:hover { border-color: var(--primary); transform: scale(1.04); }
+    .lb-thumb-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .lb-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lb-overlay.open { opacity: 1; pointer-events: all; }
+    .lb-container {
+      position: relative;
+      max-width: 860px;
+      width: 95%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+    .lb-overlay.open .lb-container { transform: scale(1); }
+    .lb-image {
+      width: 100%;
+      height: 480px;
+      max-height: 70vh;
+      border-radius: var(--radius-lg);
+      display: block;
+      object-fit: cover;
+    }
+    .lb-close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    .lb-close:hover { background: rgba(255, 255, 255, 0.3); }
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    .lb-arrow:hover { background: rgba(255, 255, 255, 0.3); }
+    .lb-arrow-left  { left: -56px; }
+    .lb-arrow-right { right: -56px; }
+    .lb-caption {
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 700px) {
+      .lb-arrow-left  { left: 6px; }
+      .lb-arrow-right { right: 6px; }
+    }
+
+    /* ============================================================
+       7. Multi-step Modal
+       ============================================================ */
+    .step-box {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 520px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+      box-shadow: var(--shadow-xl);
+    }
+    .modal-overlay.open .step-box { transform: scale(1); }
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 1.75rem;
+    }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      color: var(--text-muted);
+      background: var(--surface);
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+    .step-dot.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+    .step-dot.done {
+      border-color: var(--success);
+      background: var(--success);
+      color: white;
+    }
+    .step-line {
+      height: 2px;
+      width: 60px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .step-line.done { background: var(--success); }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .step-panel h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .step-panel p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+    .step-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .step-input {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: border-color var(--transition);
+    }
+    .step-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+    .step-input::placeholder { color: var(--text-muted); }
+    .step-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    .step-success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+    }
+
+    /* ============================================================
+       8. Notification Toasts
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 1.5rem;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      min-width: 280px;
+      max-width: 360px;
+      pointer-events: all;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s;
+    }
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .toast-content { flex: 1; }
+    .toast-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .toast-msg {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0;
+      transition: color var(--transition);
+      flex-shrink: 0;
+    }
+    .toast-close:hover { color: var(--text); }
+    .toast-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      animation: toastProgress 3s linear forwards;
+    }
+    .toast { position: relative; }
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+    .toast-success .toast-progress { background: var(--success); }
+    .toast-error   .toast-progress { background: var(--danger); }
+    .toast-warning .toast-progress { background: var(--warning); }
+    .toast-info    .toast-progress { background: var(--info); }
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error   { border-left: 4px solid var(--danger); }
+    .toast-warning { border-left: 4px solid var(--warning); }
+    .toast-info    { border-left: 4px solid var(--info); }
+
+    /* toast type buttons group */
+    .toast-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .btn-success-outline {
+      background: transparent;
+      color: var(--success);
+      border: 1.5px solid var(--success);
+    }
+    .btn-success-outline:hover { background: rgba(16,185,129,0.08); }
+    .btn-error-outline {
+      background: transparent;
+      color: var(--danger);
+      border: 1.5px solid var(--danger);
+    }
+    .btn-error-outline:hover { background: rgba(239,68,68,0.08); }
+    .btn-warning-outline {
+      background: transparent;
+      color: var(--warning);
+      border: 1.5px solid var(--warning);
+    }
+    .btn-warning-outline:hover { background: rgba(245,158,11,0.08); }
+    .btn-info-outline {
+      background: transparent;
+      color: var(--info);
+      border: 1.5px solid var(--info);
+    }
+    .btn-info-outline:hover { background: rgba(59,130,246,0.08); }
+
+    /* ============================================================
+       Ripple effect for buttons
+       ============================================================ */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transform: scale(0);
+      animation: rippleAnim 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      to { transform: scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       Global Header
+       ============================================================ -->
+  <header class="global-header">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <a href="../index.html" class="header-logo">
+        <div class="header-logo-icon">✦</div>
+        UI Catalog
+      </a>
+    </div>
+    <div class="header-right">
+      <span class="header-theme-label">Dark mode</span>
+      <label class="theme-toggle" aria-label="Toggle dark mode">
+        <input type="checkbox" id="theme-toggle">
+        <span class="theme-toggle-track"></span>
+        <span class="theme-toggle-thumb">☀️</span>
+      </label>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ============================================================
+       Layout
+       ============================================================ -->
+  <div class="layout-wrapper">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar" aria-label="Component navigation">
+      <div class="sidebar-section-title">Navigation</div>
+      <a href="../index.html"        class="sidebar-link">🏠 Home</a>
+      <div class="sidebar-section-title">Components</div>
+      <a href="buttons.html"         class="sidebar-link">🔘 Buttons</a>
+      <a href="cards.html"           class="sidebar-link">🃏 Cards</a>
+      <a href="forms.html"           class="sidebar-link">📝 Forms</a>
+      <a href="navbars.html"         class="sidebar-link">🧭 Navbars</a>
+      <a href="heroes.html"          class="sidebar-link">🦸 Heroes</a>
+      <a href="footers.html"         class="sidebar-link">🦶 Footers</a>
+      <a href="modals.html"          class="sidebar-link active">🪟 Modals</a>
+      <a href="tables.html"          class="sidebar-link">📊 Tables</a>
+      <a href="badges.html"          class="sidebar-link">🏷️ Badges</a>
+      <a href="alerts.html"          class="sidebar-link">⚠️ Alerts</a>
+      <a href="tabs.html"            class="sidebar-link">📑 Tabs</a>
+      <a href="accordions.html"      class="sidebar-link">🪗 Accordions</a>
+      <a href="breadcrumbs.html"     class="sidebar-link">🍞 Breadcrumbs</a>
+      <a href="pagination.html"      class="sidebar-link">📄 Pagination</a>
+      <a href="tooltips.html"        class="sidebar-link">💬 Tooltips</a>
+      <a href="dropdowns.html"       class="sidebar-link">🔽 Dropdowns</a>
+      <a href="sidebars.html"        class="sidebar-link">◀️ Sidebars</a>
+      <a href="loaders.html"         class="sidebar-link">⏳ Loaders</a>
+      <a href="toggles.html"         class="sidebar-link">🔛 Toggles</a>
+      <a href="avatars.html"         class="sidebar-link">👤 Avatars</a>
+    </nav>
+
+    <!-- ============================================================
+         Main Content
+         ============================================================ -->
+    <main class="main-content">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Modals</span>
+      </nav>
+
+      <h1 class="section-title">Modals</h1>
+      <p class="section-subtitle">Overlay dialogs, drawers, sheets, lightboxes, toasts, and more — all built with CSS transitions and vanilla JS.</p>
+
+
+      <!-- ===========================================================
+           1. Basic Modal
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">1. Basic Modal</span>
+          <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-primary btn-ripple" onclick="openModal('modal-basic')">Open Modal</button>
+        </div>
+        <div class="code-snippet" id="code-basic">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;button onclick="openModal('modal-basic')"&gt;Open Modal&lt;/button&gt;
+
+&lt;div class="modal-overlay" id="modal-basic"&gt;
+  &lt;div class="modal-box"&gt;
+    &lt;div class="modal-header"&gt;
+      &lt;span class="modal-title"&gt;Modal Title&lt;/span&gt;
+      &lt;button class="modal-close" onclick="closeModal('modal-basic')"&gt;&amp;times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-body"&gt;Modal body content goes here.&lt;/div&gt;
+    &lt;div class="modal-footer"&gt;
+      &lt;button onclick="closeModal('modal-basic')"&gt;Cancel&lt;/button&gt;
+      &lt;button&gt;Confirm&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           2. Confirm Dialog
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">2. Confirm Dialog</span>
+          <button class="show-code-btn" data-target="code-confirm">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-danger btn-ripple" onclick="openModal('modal-confirm')">Delete Item</button>
+        </div>
+        <div class="code-snippet" id="code-confirm">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="modal-overlay" id="modal-confirm"&gt;
+  &lt;div class="confirm-box"&gt;
+    &lt;div class="confirm-icon"&gt;🗑️&lt;/div&gt;
+    &lt;div class="confirm-title"&gt;Delete this item?&lt;/div&gt;
+    &lt;div class="confirm-desc"&gt;This action cannot be undone.&lt;/div&gt;
+    &lt;div class="confirm-actions"&gt;
+      &lt;button onclick="closeModal('modal-confirm')"&gt;Cancel&lt;/button&gt;
+      &lt;button class="btn-danger"&gt;Yes, Delete&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           3. Fullscreen Modal
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">3. Fullscreen Modal</span>
+          <button class="show-code-btn" data-target="code-fullscreen">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-outline btn-ripple" onclick="openOverlay('modal-fullscreen')">Open Fullscreen</button>
+        </div>
+        <div class="code-snippet" id="code-fullscreen">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="fullscreen-overlay" id="modal-fullscreen"&gt;
+  &lt;div class="fullscreen-inner"&gt;
+    &lt;div class="fullscreen-topbar"&gt;
+      &lt;span class="fullscreen-title"&gt;Fullscreen Modal&lt;/span&gt;
+      &lt;button onclick="closeOverlay('modal-fullscreen')"&gt;&amp;times; Close&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="fullscreen-content"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           4. Drawer (Slide-in from right)
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">4. Slide-in Drawer</span>
+          <button class="show-code-btn" data-target="code-drawer">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-primary btn-ripple" onclick="openOverlay('modal-drawer')">Open Drawer</button>
+        </div>
+        <div class="code-snippet" id="code-drawer">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="drawer-overlay" id="modal-drawer"&gt;
+  &lt;div class="drawer-panel"&gt;
+    &lt;div class="drawer-header"&gt;
+      &lt;span class="drawer-title"&gt;Drawer Panel&lt;/span&gt;
+      &lt;button onclick="closeOverlay('modal-drawer')"&gt;&amp;times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="drawer-body"&gt;...&lt;/div&gt;
+    &lt;div class="drawer-footer"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           5. Bottom Sheet
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">5. Bottom Sheet</span>
+          <button class="show-code-btn" data-target="code-bottom">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-primary btn-ripple" onclick="openOverlay('modal-bottom')">Open Bottom Sheet</button>
+        </div>
+        <div class="code-snippet" id="code-bottom">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="bottom-sheet-overlay" id="modal-bottom"&gt;
+  &lt;div class="bottom-sheet-panel"&gt;
+    &lt;div class="bottom-sheet-handle"&gt;&lt;/div&gt;
+    &lt;div class="bottom-sheet-title"&gt;Share&lt;/div&gt;
+    &lt;div class="bottom-sheet-actions"&gt;...&lt;/div&gt;
+    &lt;button class="bottom-sheet-cancel"&gt;Cancel&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           6. Image Lightbox
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">6. Image Lightbox</span>
+          <button class="show-code-btn" data-target="code-lightbox">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <div class="lightbox-thumbnails" id="lb-thumbs">
+            <div class="lb-thumb" data-index="0" onclick="openLightbox(0)" aria-label="Open image 1">
+              <div class="lb-thumb-img" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"></div>
+            </div>
+            <div class="lb-thumb" data-index="1" onclick="openLightbox(1)" aria-label="Open image 2">
+              <div class="lb-thumb-img" style="background:linear-gradient(135deg,#10b981,#3b82f6);"></div>
+            </div>
+            <div class="lb-thumb" data-index="2" onclick="openLightbox(2)" aria-label="Open image 3">
+              <div class="lb-thumb-img" style="background:linear-gradient(135deg,#f59e0b,#ef4444);"></div>
+            </div>
+            <div class="lb-thumb" data-index="3" onclick="openLightbox(3)" aria-label="Open image 4">
+              <div class="lb-thumb-img" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="code-snippet" id="code-lightbox">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="lb-thumb" onclick="openLightbox(0)"&gt;
+  &lt;div class="lb-thumb-img" style="background:linear-gradient(...)"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="lb-overlay" id="lb-overlay"&gt;
+  &lt;div class="lb-container"&gt;
+    &lt;button class="lb-arrow lb-arrow-left"  onclick="lbNav(-1)"&gt;&#8249;&lt;/button&gt;
+    &lt;button class="lb-arrow lb-arrow-right" onclick="lbNav(1)"&gt;&#8250;&lt;/button&gt;
+    &lt;div class="lb-image" id="lb-image"&gt;&lt;/div&gt;
+    &lt;button class="lb-close" onclick="closeLightbox()"&gt;&amp;times;&lt;/button&gt;
+    &lt;div class="lb-caption" id="lb-caption"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           7. Multi-step Modal
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">7. Multi-step Modal</span>
+          <button class="show-code-btn" data-target="code-steps">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <button class="btn btn-primary btn-ripple" onclick="openModal('modal-steps'); initSteps()">Open Multi-step</button>
+        </div>
+        <div class="code-snippet" id="code-steps">
+          <button class="copy-btn">Copy</button>
+          <pre>&lt;div class="modal-overlay" id="modal-steps"&gt;
+  &lt;div class="step-box"&gt;
+    &lt;div class="step-indicator"&gt;
+      &lt;div class="step-dot active" id="dot-1"&gt;1&lt;/div&gt;
+      &lt;div class="step-line" id="line-1"&gt;&lt;/div&gt;
+      &lt;div class="step-dot" id="dot-2"&gt;2&lt;/div&gt;
+      &lt;div class="step-line" id="line-2"&gt;&lt;/div&gt;
+      &lt;div class="step-dot" id="dot-3"&gt;3&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="step-panel active" id="step-panel-1"&gt;...&lt;/div&gt;
+    &lt;div class="step-panel"      id="step-panel-2"&gt;...&lt;/div&gt;
+    &lt;div class="step-panel"      id="step-panel-3"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <!-- ===========================================================
+           8. Notification Toast
+           =========================================================== -->
+      <div class="demo-block">
+        <div class="demo-block-header">
+          <span class="demo-block-title">8. Notification Toast</span>
+          <button class="show-code-btn" data-target="code-toast">▶ Show Code</button>
+        </div>
+        <div class="demo-block-body">
+          <div class="toast-btn-group">
+            <button class="btn btn-success-outline btn-ripple" onclick="showToast('success','Success','Item saved successfully.')">Success</button>
+            <button class="btn btn-error-outline   btn-ripple" onclick="showToast('error',  'Error',  'Something went wrong.')">Error</button>
+            <button class="btn btn-warning-outline btn-ripple" onclick="showToast('warning','Warning','Check your input.')">Warning</button>
+            <button class="btn btn-info-outline    btn-ripple" onclick="showToast('info',   'Info',   'New update available.')">Info</button>
+          </div>
+        </div>
+        <div class="code-snippet" id="code-toast">
+          <button class="copy-btn">Copy</button>
+          <pre>// Show a toast
+showToast('success', 'Success', 'Item saved successfully.');
+
+// Toast container (injected automatically)
+&lt;div class="toast-container" id="toast-container"&gt;&lt;/div&gt;
+
+// Each toast element
+&lt;div class="toast toast-success show"&gt;
+  &lt;span class="toast-icon"&gt;✅&lt;/span&gt;
+  &lt;div class="toast-content"&gt;
+    &lt;div class="toast-title"&gt;Success&lt;/div&gt;
+    &lt;div class="toast-msg"&gt;Item saved successfully.&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button class="toast-close"&gt;&amp;times;&lt;/button&gt;
+  &lt;div class="toast-progress"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+    </main><!-- /main-content -->
+  </div><!-- /layout-wrapper -->
+
+
+  <!-- ============================================================
+       MODAL MARKUP
+       ============================================================ -->
+
+  <!-- 1. Basic Modal -->
+  <div class="modal-overlay" id="modal-basic" role="dialog" aria-modal="true" aria-labelledby="basic-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="basic-title">Modal Title</span>
+        <button class="modal-close" onclick="closeModal('modal-basic')" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>This is the modal body. You can place any content here — text, forms, images, or other components.</p>
+        <p style="margin-top:.75rem;">Click the backdrop or the Cancel button to dismiss this dialog.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-basic')">Cancel</button>
+        <button class="btn btn-primary"   onclick="closeModal('modal-basic')">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Confirm Dialog -->
+  <div class="modal-overlay" id="modal-confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-box">
+      <button class="modal-close" style="position:absolute;top:.75rem;right:.75rem;" onclick="closeModal('modal-confirm')" aria-label="Close">&times;</button>
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title" id="confirm-title">Delete this item?</div>
+      <div class="confirm-desc">This action <strong>cannot be undone</strong>. The item will be permanently removed from your account.</div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancel</button>
+        <button class="btn btn-danger"    onclick="closeModal('modal-confirm')">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Fullscreen Modal -->
+  <div class="fullscreen-overlay" id="modal-fullscreen" role="dialog" aria-modal="true" aria-labelledby="fs-title">
+    <div class="fullscreen-inner">
+      <div class="fullscreen-topbar">
+        <span class="fullscreen-title" id="fs-title">Fullscreen Modal</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeOverlay('modal-fullscreen')">&times; Close</button>
+      </div>
+      <div class="fullscreen-content">
+        <h2>Fullscreen Content Area</h2>
+        <p>This modal covers the entire viewport, giving your content maximum room to breathe. Use it for complex forms, document previews, or immersive experiences.</p>
+        <p>Scroll down to see how the layout extends with the page. The top bar stays sticky, while the content scrolls naturally within the overlay.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:1.5rem;">
+          <div style="padding:1.5rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface-2);">
+            <div style="font-size:1.5rem;margin-bottom:.5rem;">📁</div>
+            <div style="font-weight:600;margin-bottom:.25rem;color:var(--text);">Files</div>
+            <div style="font-size:.85rem;color:var(--text-muted);">Manage your uploaded files and documents.</div>
+          </div>
+          <div style="padding:1.5rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface-2);">
+            <div style="font-size:1.5rem;margin-bottom:.5rem;">⚙️</div>
+            <div style="font-weight:600;margin-bottom:.25rem;color:var(--text);">Settings</div>
+            <div style="font-size:.85rem;color:var(--text-muted);">Configure preferences and account options.</div>
+          </div>
+          <div style="padding:1.5rem;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface-2);">
+            <div style="font-size:1.5rem;margin-bottom:.5rem;">🔔</div>
+            <div style="font-weight:600;margin-bottom:.25rem;color:var(--text);">Notifications</div>
+            <div style="font-size:.85rem;color:var(--text-muted);">Review alerts and system messages.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Drawer -->
+  <div class="drawer-overlay" id="modal-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <span class="drawer-title" id="drawer-title">Navigation Drawer</span>
+        <button class="modal-close" onclick="closeOverlay('modal-drawer')" aria-label="Close">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p>This panel slides in from the right side of the screen. Common uses include settings panels, detail views, and navigation menus.</p>
+        <div class="drawer-list-item">
+          <div class="drawer-list-item-icon">🏠</div>
+          <div><div style="font-weight:600;">Dashboard</div><div style="font-size:.8rem;color:var(--text-muted);">Overview and analytics</div></div>
+        </div>
+        <div class="drawer-list-item">
+          <div class="drawer-list-item-icon">👥</div>
+          <div><div style="font-weight:600;">Team</div><div style="font-size:.8rem;color:var(--text-muted);">Manage members and roles</div></div>
+        </div>
+        <div class="drawer-list-item">
+          <div class="drawer-list-item-icon">📊</div>
+          <div><div style="font-weight:600;">Reports</div><div style="font-size:.8rem;color:var(--text-muted);">Export and view reports</div></div>
+        </div>
+        <div class="drawer-list-item">
+          <div class="drawer-list-item-icon">⚙️</div>
+          <div><div style="font-weight:600;">Settings</div><div style="font-size:.8rem;color:var(--text-muted);">Account and preferences</div></div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeOverlay('modal-drawer')">Close</button>
+        <button class="btn btn-primary"   style="flex:1;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Bottom Sheet -->
+  <div class="bottom-sheet-overlay" id="modal-bottom" role="dialog" aria-modal="true" aria-labelledby="bs-title">
+    <div class="bottom-sheet-panel">
+      <div class="bottom-sheet-handle"></div>
+      <div class="bottom-sheet-title" id="bs-title">Share this post</div>
+      <div class="bottom-sheet-actions">
+        <button class="bsa-item"><span class="bsa-icon">🔗</span>Copy Link</button>
+        <button class="bsa-item"><span class="bsa-icon">✉️</span>Email</button>
+        <button class="bsa-item"><span class="bsa-icon">💬</span>Message</button>
+        <button class="bsa-item"><span class="bsa-icon">📌</span>Pinterest</button>
+        <button class="bsa-item"><span class="bsa-icon">🐦</span>Twitter</button>
+        <button class="bsa-item"><span class="bsa-icon">📘</span>Facebook</button>
+        <button class="bsa-item"><span class="bsa-icon">💼</span>LinkedIn</button>
+        <button class="bsa-item"><span class="bsa-icon">📷</span>Instagram</button>
+      </div>
+      <button class="bottom-sheet-cancel" onclick="closeOverlay('modal-bottom')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- 6. Lightbox -->
+  <div class="lb-overlay" id="lb-overlay" role="dialog" aria-modal="true" aria-label="Image lightbox">
+    <div class="lb-container">
+      <button class="lb-arrow lb-arrow-left"  onclick="lbNav(-1)" aria-label="Previous image">&#8249;</button>
+      <button class="lb-arrow lb-arrow-right" onclick="lbNav(1)"  aria-label="Next image">&#8250;</button>
+      <div class="lb-image" id="lb-image" role="img" aria-label="Lightbox image"></div>
+      <button class="lb-close" onclick="closeLightbox()" aria-label="Close lightbox">&times;</button>
+      <div class="lb-caption" id="lb-caption"></div>
+    </div>
+  </div>
+
+  <!-- 7. Multi-step Modal -->
+  <div class="modal-overlay" id="modal-steps" role="dialog" aria-modal="true" aria-labelledby="step-main-title">
+    <div class="step-box">
+      <div class="modal-header">
+        <span class="modal-title" id="step-main-title">Create Account</span>
+        <button class="modal-close" onclick="closeModal('modal-steps')" aria-label="Close">&times;</button>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="step-indicator" style="margin-top:1rem;">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-line"       id="line-1"></div>
+        <div class="step-dot"        id="dot-2">2</div>
+        <div class="step-line"       id="line-2"></div>
+        <div class="step-dot"        id="dot-3">3</div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-panel active" id="step-panel-1">
+        <h3>Your Details</h3>
+        <p>Tell us a bit about yourself to get started.</p>
+        <div class="step-input-group">
+          <div>
+            <label class="step-label" for="s-name">Full Name</label>
+            <input class="step-input" id="s-name" type="text" placeholder="Jane Smith">
+          </div>
+          <div>
+            <label class="step-label" for="s-email">Email Address</label>
+            <input class="step-input" id="s-email" type="email" placeholder="jane@example.com">
+          </div>
+        </div>
+        <div class="modal-footer" style="margin-top:1.25rem;">
+          <button class="btn btn-secondary" onclick="closeModal('modal-steps')">Cancel</button>
+          <button class="btn btn-primary"   onclick="goStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-panel" id="step-panel-2">
+        <h3>Choose a Plan</h3>
+        <p>Select the subscription that best fits your needs.</p>
+        <div class="step-input-group">
+          <label style="display:flex;align-items:center;gap:.6rem;padding:.75rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text);">
+            <input type="radio" name="plan" value="free" checked> Free — $0/month
+          </label>
+          <label style="display:flex;align-items:center;gap:.6rem;padding:.75rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text);">
+            <input type="radio" name="plan" value="pro"> Pro — $12/month
+          </label>
+          <label style="display:flex;align-items:center;gap:.6rem;padding:.75rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text);">
+            <input type="radio" name="plan" value="team"> Team — $49/month
+          </label>
+        </div>
+        <div class="modal-footer" style="margin-top:1.25rem;">
+          <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary"   onclick="goStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-panel" id="step-panel-3">
+        <div class="step-success-icon">🎉</div>
+        <h3 style="text-align:center;">All set!</h3>
+        <p style="text-align:center;">Your account has been created. Welcome aboard — you can now explore the platform.</p>
+        <div class="modal-footer" style="margin-top:1.25rem;justify-content:center;">
+          <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-success"   onclick="closeModal('modal-steps')">Done ✓</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast container (populated by JS) -->
+  <div class="toast-container" id="toast-container"></div>
+
+
+  <!-- ============================================================
+       JavaScript
+       ============================================================ -->
+  <script>
+    /* ---------------------------------------------------------------
+       Helpers: open/close modal overlays
+    --------------------------------------------------------------- */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Overlays that don't use .modal-overlay class (fullscreen, drawer, bottom-sheet)
+    function openOverlay(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeOverlay(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* Click-outside-to-close for standard modal overlays */
+    document.addEventListener('click', function (e) {
+      // Basic / Confirm / Steps modals: click on the .modal-overlay backdrop
+      if (e.target.classList.contains('modal-overlay')) {
+        closeModal(e.target.id);
+      }
+      // Drawer: click on the semi-transparent part (the overlay itself, not the panel)
+      if (e.target.classList.contains('drawer-overlay')) {
+        closeOverlay(e.target.id);
+      }
+      // Bottom sheet: click on the overlay backdrop (not the panel)
+      if (e.target.classList.contains('bottom-sheet-overlay')) {
+        closeOverlay(e.target.id);
+      }
+    });
+
+    /* Keyboard Escape to close */
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll('.modal-overlay.open').forEach(el => closeModal(el.id));
+      document.querySelectorAll('.fullscreen-overlay.open').forEach(el => closeOverlay(el.id));
+      document.querySelectorAll('.drawer-overlay.open').forEach(el => closeOverlay(el.id));
+      document.querySelectorAll('.bottom-sheet-overlay.open').forEach(el => closeOverlay(el.id));
+      closeLightbox();
+    });
+
+    /* ---------------------------------------------------------------
+       6. Lightbox
+    --------------------------------------------------------------- */
+    const lbImages = [
+      { gradient: 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)', caption: 'Image 1 of 4 — Indigo Violet' },
+      { gradient: 'linear-gradient(135deg,#10b981 0%,#3b82f6 100%)', caption: 'Image 2 of 4 — Emerald Blue' },
+      { gradient: 'linear-gradient(135deg,#f59e0b 0%,#ef4444 100%)', caption: 'Image 3 of 4 — Amber Red' },
+      { gradient: 'linear-gradient(135deg,#ec4899 0%,#8b5cf6 100%)', caption: 'Image 4 of 4 — Pink Violet' },
+    ];
+    let lbCurrent = 0;
+
+    function openLightbox(index) {
+      lbCurrent = index;
+      renderLightbox();
+      const overlay = document.getElementById('lb-overlay');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      const overlay = document.getElementById('lb-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function renderLightbox() {
+      const img = document.getElementById('lb-image');
+      const cap = document.getElementById('lb-caption');
+      const data = lbImages[lbCurrent];
+      img.style.background = data.gradient;
+      cap.textContent = data.caption;
+    }
+    function lbNav(dir) {
+      lbCurrent = (lbCurrent + dir + lbImages.length) % lbImages.length;
+      renderLightbox();
+    }
+    // Click backdrop to close lightbox
+    document.getElementById('lb-overlay').addEventListener('click', function (e) {
+      if (e.target === this) closeLightbox();
+    });
+
+    /* ---------------------------------------------------------------
+       7. Multi-step Modal
+    --------------------------------------------------------------- */
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    function initSteps() {
+      goStep(1);
+    }
+
+    function goStep(step) {
+      // Update panels
+      for (let i = 1; i <= totalSteps; i++) {
+        const panel = document.getElementById('step-panel-' + i);
+        if (panel) panel.classList.toggle('active', i === step);
+      }
+      // Update dots
+      for (let i = 1; i <= totalSteps; i++) {
+        const dot = document.getElementById('dot-' + i);
+        if (!dot) continue;
+        dot.classList.remove('active', 'done');
+        if (i < step)      dot.classList.add('done');
+        else if (i === step) dot.classList.add('active');
+      }
+      // Update lines
+      for (let i = 1; i < totalSteps; i++) {
+        const line = document.getElementById('line-' + i);
+        if (line) line.classList.toggle('done', i < step);
+      }
+      currentStep = step;
+    }
+
+    /* ---------------------------------------------------------------
+       8. Toast Notifications
+    --------------------------------------------------------------- */
+    const toastMeta = {
+      success: { icon: '✅', label: 'Success' },
+      error:   { icon: '❌', label: 'Error' },
+      warning: { icon: '⚠️', label: 'Warning' },
+      info:    { icon: 'ℹ️', label: 'Info' },
+    };
+
+    function showToast(type, title, message) {
+      const container = document.getElementById('toast-container');
+      const meta = toastMeta[type] || toastMeta.info;
+
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerHTML = `
+        <span class="toast-icon">${meta.icon}</span>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-msg">${message}</div>
+        </div>
+        <button class="toast-close" onclick="dismissToast(this.parentElement)" aria-label="Dismiss">&times;</button>
+        <div class="toast-progress"></div>
+      `;
+
+      container.appendChild(toast);
+
+      // Animate in
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('show'));
+      });
+
+      // Auto-dismiss after 3s
+      const timer = setTimeout(() => dismissToast(toast), 3000);
+      toast._dismissTimer = timer;
+    }
+
+    function dismissToast(toast) {
+      if (!toast || !toast.parentElement) return;
+      clearTimeout(toast._dismissTimer);
+      toast.classList.remove('show');
+      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    }
+  </script>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
