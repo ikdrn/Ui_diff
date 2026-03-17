@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dropdowns — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Dropdowns page — コンポーネント固有スタイル
+       ドロップダウンはトリガー要素に対して相対配置されるメニュー。
+       open クラスで表示/非表示を制御し、JS でクラスを付け外しする。
+       ============================================================ */
+
+    /* ---- ページタイトルブロック ---- */
+    .page-title-block {
+      margin-bottom: 2rem;
+    }
+    .page-title-block h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .page-title-block p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* ---- ドロップダウン外包要素 ---- */
+    /* position:relative でメニューの基点を設定 */
+    .dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* ---- トリガーボタン ---- */
+    .dropdown-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .dropdown-trigger:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-2);
+    }
+    /* open状態: primaryボーダーで「展開中」を明示 */
+    .dropdown-wrapper.open .dropdown-trigger {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    /* 矢印アイコンのアニメーション */
+    .dropdown-chevron {
+      transition: transform var(--transition);
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+    .dropdown-wrapper.open .dropdown-chevron {
+      transform: rotate(180deg); /* メニュー展開時に上向きに反転 */
+    }
+
+    /* ---- ドロップダウンメニュー本体 ---- */
+    /* opacity + visibility + transform の3点制御:
+       visibility:hidden だけだとキーボードフォーカスが残るため
+       opacity と transform も合わせて使う */
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px); /* トリガーの直下に4px余白 */
+      left: 0;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden; /* display:noneより滑らか: アニメーション可能 */
+      transform: translateY(-4px); /* 上からスライドイン */
+      transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+      padding: 0.35rem 0;
+    }
+    /* open クラスで表示 */
+    .dropdown-wrapper.open .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* 右揃えドロップダウン: right:0 で右端に合わせる */
+    .dropdown-menu.align-right {
+      left: auto;
+      right: 0;
+    }
+
+    /* ---- メニューアイテム ---- */
+    /* button 要素のリセット + flex 横並び */
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 1rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background var(--transition);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .dropdown-item:hover {
+      background: var(--surface-2); /* ホバー: 背景色変化のみ (primary は使わない) */
+    }
+    .dropdown-item:focus-visible {
+      outline: none;
+      background: var(--surface-2);
+    }
+    /* danger アイテム: 削除など破壊的操作のみ */
+    .dropdown-item.danger {
+      color: var(--text);
+    }
+    .dropdown-item.danger:hover {
+      background: var(--danger-subtle); /* danger-subtle: 赤は状態色なので薄く使う */
+      color: var(--danger);
+    }
+
+    /* アイテム内アイコン */
+    .dropdown-item-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+    .dropdown-item:hover .dropdown-item-icon {
+      color: var(--text); /* ホバー時はアイコンも text に昇格 */
+    }
+    .dropdown-item.danger:hover .dropdown-item-icon {
+      color: var(--danger);
+    }
+
+    /* アイテム右端のショートカットキー表示 */
+    .dropdown-item-shortcut {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+      padding-left: 1rem;
+    }
+
+    /* ---- セクション区切り線 ---- */
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.35rem 0;
+    }
+
+    /* ---- セクションラベル ---- */
+    .dropdown-section-label {
+      padding: 0.4rem 1rem 0.2rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-subtle);
+    }
+
+    /* ---- チェックボックス付きアイテム ---- */
+    .dropdown-item-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .dropdown-item-check.checked {
+      background: var(--primary); /* チェック済: primary は「選択中」の意味 */
+      border-color: var(--primary);
+    }
+    .dropdown-item-check svg {
+      width: 10px;
+      height: 10px;
+      color: #fff;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .dropdown-item-check.checked svg {
+      opacity: 1;
+    }
+
+    /* ---- 検索ドロップダウン: 入力フィールド ---- */
+    .dropdown-search-box {
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .dropdown-search-input {
+      width: 100%;
+      padding: 0.4rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .dropdown-search-input::placeholder {
+      color: var(--text-subtle);
+    }
+    .dropdown-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-subtle);
+    }
+    /* 検索結果なしの空状態 */
+    .dropdown-empty {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-subtle);
+    }
+
+    /* ---- ネストしたサブメニュー ---- */
+    .dropdown-item-sub {
+      position: relative;
+    }
+    .dropdown-item-sub .dropdown-sub-arrow {
+      margin-left: auto;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    /* サブメニュー: 親アイテムの右横に表示 */
+    .dropdown-submenu {
+      position: absolute;
+      top: -0.35rem;
+      left: calc(100% + 4px); /* 親メニューの右側 */
+      min-width: 180px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 101; /* 親メニュー(100)より前面 */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-4px);
+      transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+      padding: 0.35rem 0;
+    }
+    /* サブメニュー: ホバー時に表示 */
+    .dropdown-item-sub:hover .dropdown-submenu,
+    .dropdown-item-sub.sub-open .dropdown-submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* ---- コンテキストメニュースタイル ---- */
+    /* 右クリックメニュー: コンパクトな行間 */
+    .context-menu {
+      min-width: 175px;
+      padding: 0.25rem 0;
+    }
+    .context-menu .dropdown-item {
+      padding: 0.42rem 0.9rem;
+      font-size: 0.82rem;
+    }
+
+    /* ---- デモボタン ---- */
+    .demo-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius);
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary); /* 主要CTA: primary */
+      color: #fff;
+      transition: opacity var(--transition);
+    }
+    .demo-btn:hover { opacity: 0.88; }
+
+    /* ---- デモブロックボディ: overflow visible でドロップダウンが見えるようにする ---- */
+    /* 通常の demo-block-body は overflow:hidden の可能性があるため上書き */
+    .demo-block-body.dropdown-demo {
+      overflow: visible;
+      min-height: 220px;
+      align-items: flex-start;
+      padding-top: 1.5rem;
+    }
+
+    /* ---- コンテキストメニューのデモエリア ---- */
+    .context-demo-area {
+      width: 100%;
+      min-height: 120px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: context-menu;
+      user-select: none;
+      transition: border-color var(--transition);
+      position: relative;
+    }
+    .context-demo-area:hover {
+      border-color: var(--border-strong);
+    }
+    /* コンテキストメニュー: 絶対位置でカーソル位置に表示 */
+    .context-menu-popup {
+      position: fixed; /* fixed でページスクロールに追従しない */
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.95);
+      transform-origin: top left;
+      transition: opacity 0.1s ease, transform 0.1s ease, visibility 0.1s ease;
+    }
+    .context-menu-popup.open {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     グローバルヘッダー
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="layout-wrapper">
+
+  <!-- ============================================================
+       左サイドバー
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+
+    <a href="../index.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </aside>
+
+  <!-- ============================================================
+       メインコンテンツ
+       ============================================================ -->
+  <main class="main-content">
+
+    <!-- パンくずリスト -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Dropdowns</span>
+    </nav>
+
+    <!-- ページタイトル -->
+    <div class="page-title-block">
+      <h1>Dropdowns</h1>
+      <p>Interactive menus that appear on trigger click. Seven variants — from basic lists to nested sub-menus and context menus.</p>
+    </div>
+
+    <!-- ======================================================
+         1. 基本ドロップダウン: トリガーボタン + メニューリスト
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Basic Dropdown</span>
+        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-basic">
+          <button class="dropdown-trigger" data-dd="dd-basic" aria-haspopup="true" aria-expanded="false">
+            Options
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <button class="dropdown-item" role="menuitem">View profile</button>
+            <button class="dropdown-item" role="menuitem">Edit settings</button>
+            <button class="dropdown-item" role="menuitem">Duplicate</button>
+            <button class="dropdown-item" role="menuitem">Export as PDF</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" role="menuitem">Delete item</button>
+          </div>
+        </div>
+
+        <div class="dropdown-wrapper" id="dd-basic2">
+          <button class="dropdown-trigger" data-dd="dd-basic2" aria-haspopup="true" aria-expanded="false">
+            Sort by
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <button class="dropdown-item" role="menuitem">Name (A–Z)</button>
+            <button class="dropdown-item" role="menuitem">Name (Z–A)</button>
+            <button class="dropdown-item" role="menuitem">Date created</button>
+            <button class="dropdown-item" role="menuitem">Last modified</button>
+            <button class="dropdown-item" role="menuitem">File size</button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-basic">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="dropdown-wrapper" id="my-dd"&gt;
+  &lt;button class="dropdown-trigger" data-dd="my-dd"&gt;
+    Options
+    &lt;svg class="dropdown-chevron" ...&gt;&lt;/svg&gt;
+  &lt;/button&gt;
+  &lt;div class="dropdown-menu"&gt;
+    &lt;button class="dropdown-item"&gt;View profile&lt;/button&gt;
+    &lt;button class="dropdown-item"&gt;Edit settings&lt;/button&gt;
+    &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
+    &lt;button class="dropdown-item danger"&gt;Delete&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         2. アイコン付きドロップダウン: 先頭アイコンで操作を識別
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Dropdown with Icons</span>
+        <button class="show-code-btn" data-target="code-icons">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-icons">
+          <button class="dropdown-trigger" data-dd="dd-icons">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Account
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Your profile
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              Settings
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              Notifications
+              <span class="dropdown-item-shortcut" style="background:var(--primary-subtle);color:var(--primary);padding:0.1rem 0.4rem;border-radius:3px;font-weight:600;font-size:0.7rem;">3</span>
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Help &amp; support
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sign out
+            </button>
+          </div>
+        </div>
+
+        <div class="dropdown-wrapper" id="dd-actions">
+          <button class="dropdown-trigger" data-dd="dd-actions">
+            Actions
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+              <span class="dropdown-item-shortcut">⌘E</span>
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Duplicate
+              <span class="dropdown-item-shortcut">⌘D</span>
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+              Share
+              <span class="dropdown-item-shortcut">⌘S</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              Delete
+              <span class="dropdown-item-shortcut">⌫</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-icons">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;button class="dropdown-item"&gt;
+  &lt;svg class="dropdown-item-icon" ...&gt;&lt;/svg&gt;
+  Edit
+  &lt;span class="dropdown-item-shortcut"&gt;⌘E&lt;/span&gt;
+&lt;/button&gt;
+&lt;button class="dropdown-item danger"&gt;
+  &lt;svg class="dropdown-item-icon" ...&gt;&lt;/svg&gt;
+  Delete
+&lt;/button&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         3. 区切り線付きドロップダウン: セクション分割
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Dropdown with Dividers</span>
+        <button class="show-code-btn" data-target="code-dividers">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-dividers">
+          <button class="dropdown-trigger" data-dd="dd-dividers">
+            File
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" style="min-width:220px;">
+            <!-- セクション: 新規作成 -->
+            <div class="dropdown-section-label">Create</div>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              New document
+              <span class="dropdown-item-shortcut">⌘N</span>
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              New folder
+              <span class="dropdown-item-shortcut">⌘⇧N</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <!-- セクション: ファイル操作 -->
+            <div class="dropdown-section-label">File</div>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Import
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Export
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <div class="dropdown-divider"></div>
+            <!-- セクション: 危険な操作 -->
+            <button class="dropdown-item danger">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+              Move to trash
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-dividers">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="dropdown-menu"&gt;
+  &lt;div class="dropdown-section-label"&gt;Create&lt;/div&gt;
+  &lt;button class="dropdown-item"&gt;New document&lt;/button&gt;
+  &lt;button class="dropdown-item"&gt;New folder&lt;/button&gt;
+
+  &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
+
+  &lt;div class="dropdown-section-label"&gt;File&lt;/div&gt;
+  &lt;button class="dropdown-item"&gt;Import&lt;/button&gt;
+  &lt;button class="dropdown-item"&gt;Export&lt;/button&gt;
+
+  &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
+  &lt;button class="dropdown-item danger"&gt;Move to trash&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         4. チェックボックス付きドロップダウン: 複数選択
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Dropdown with Checkboxes</span>
+        <button class="show-code-btn" data-target="code-checkboxes">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-check">
+          <button class="dropdown-trigger" data-dd="dd-check" id="dd-check-trigger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+            <span id="filter-label">Filter columns</span>
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" style="min-width:220px;">
+            <div class="dropdown-section-label">Visible columns</div>
+            <!-- チェックボックス付きアイテム: data-checked で状態を管理 -->
+            <button class="dropdown-item check-item" data-checked="true" role="menuitemcheckbox" aria-checked="true">
+              <div class="dropdown-item-check checked">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Name
+            </button>
+            <button class="dropdown-item check-item" data-checked="true" role="menuitemcheckbox" aria-checked="true">
+              <div class="dropdown-item-check checked">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Status
+            </button>
+            <button class="dropdown-item check-item" data-checked="false" role="menuitemcheckbox" aria-checked="false">
+              <div class="dropdown-item-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Priority
+            </button>
+            <button class="dropdown-item check-item" data-checked="true" role="menuitemcheckbox" aria-checked="true">
+              <div class="dropdown-item-check checked">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Assignee
+            </button>
+            <button class="dropdown-item check-item" data-checked="false" role="menuitemcheckbox" aria-checked="false">
+              <div class="dropdown-item-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Due date
+            </button>
+            <button class="dropdown-item check-item" data-checked="false" role="menuitemcheckbox" aria-checked="false">
+              <div class="dropdown-item-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Estimate
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-checkboxes">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;button class="dropdown-item check-item"
+  data-checked="true"
+  role="menuitemcheckbox"
+  aria-checked="true"&gt;
+  &lt;div class="dropdown-item-check checked"&gt;
+    &lt;svg ...&gt;&lt;polyline points="20 6 9 17 4 12"/&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+  Name
+&lt;/button&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         5. 検索可能ドロップダウン: 入力でアイテムを絞り込む
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Searchable Dropdown</span>
+        <button class="show-code-btn" data-target="code-search">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-search">
+          <button class="dropdown-trigger" data-dd="dd-search" id="dd-search-trigger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span id="search-dd-label">Select country</span>
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" style="min-width:240px;" id="search-dd-menu">
+            <div class="dropdown-search-box">
+              <input
+                type="text"
+                class="dropdown-search-input"
+                id="country-search"
+                placeholder="Search countries..."
+                aria-label="Search countries"
+                autocomplete="off"
+              >
+            </div>
+            <div id="country-list" style="max-height:220px;overflow-y:auto;">
+              <!-- アイテムは JS で生成 -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-search">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="dropdown-menu"&gt;
+  &lt;div class="dropdown-search-box"&gt;
+    &lt;input type="text" class="dropdown-search-input"
+      placeholder="Search..." id="my-search"&gt;
+  &lt;/div&gt;
+  &lt;div id="results-list"&gt;
+    &lt;!-- フィルタ結果を JS で動的に表示 --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  document.getElementById('my-search').addEventListener('input', function(e) {
+    var q = e.target.value.toLowerCase();
+    document.querySelectorAll('.dropdown-item').forEach(function(item) {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         6. ネストしたサブメニュー: 矢印でサブメニューを展開
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Nested Sub-menu Dropdown</span>
+        <button class="show-code-btn" data-target="code-nested">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body dropdown-demo">
+        <div class="dropdown-wrapper" id="dd-nested">
+          <button class="dropdown-trigger" data-dd="dd-nested">
+            Insert
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu" style="min-width:220px;">
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Text block
+            </button>
+            <!-- サブメニューを持つアイテム -->
+            <div class="dropdown-item-sub">
+              <button class="dropdown-item">
+                <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                Media
+                <svg class="dropdown-sub-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <div class="dropdown-submenu">
+                <button class="dropdown-item">
+                  <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  Image
+                </button>
+                <button class="dropdown-item">
+                  <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                  Video
+                </button>
+                <button class="dropdown-item">
+                  <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                  Audio
+                </button>
+                <button class="dropdown-item">
+                  <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  File attachment
+                </button>
+              </div>
+            </div>
+            <!-- テーブルサブメニュー -->
+            <div class="dropdown-item-sub">
+              <button class="dropdown-item">
+                <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+                Table
+                <svg class="dropdown-sub-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <div class="dropdown-submenu">
+                <button class="dropdown-item">2 × 2 table</button>
+                <button class="dropdown-item">3 × 3 table</button>
+                <button class="dropdown-item">4 × 4 table</button>
+                <button class="dropdown-item">Custom size…</button>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Code block
+            </button>
+            <button class="dropdown-item">
+              <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Bullet list
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-nested">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- サブメニューを持つ親アイテム --&gt;
+&lt;div class="dropdown-item-sub"&gt;
+  &lt;button class="dropdown-item"&gt;
+    Media
+    &lt;svg class="dropdown-sub-arrow" ...&gt;&lt;/svg&gt;
+  &lt;/button&gt;
+  &lt;!-- .dropdown-submenu: ホバーで表示 --&gt;
+  &lt;div class="dropdown-submenu"&gt;
+    &lt;button class="dropdown-item"&gt;Image&lt;/button&gt;
+    &lt;button class="dropdown-item"&gt;Video&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         7. コンテキストメニュースタイル: 右クリック風コンパクトメニュー
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. Context Menu Style</span>
+        <button class="show-code-btn" data-target="code-context">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column" style="padding: 1.5rem;">
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.75rem;">Right-click (or long-press on mobile) anywhere in the area below:</p>
+        <!-- コンテキストメニューのデモエリア -->
+        <div class="context-demo-area" id="context-demo-area">
+          Right-click here to open the context menu
+        </div>
+      </div>
+      <!-- コンテキストメニューポップアップ -->
+      <div class="context-menu-popup dropdown-menu context-menu" id="context-menu-popup">
+        <button class="dropdown-item">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+          <span class="dropdown-item-shortcut">⌘C</span>
+        </button>
+        <button class="dropdown-item">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          Paste
+          <span class="dropdown-item-shortcut">⌘V</span>
+        </button>
+        <button class="dropdown-item">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Rename
+          <span class="dropdown-item-shortcut">F2</span>
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share…
+        </button>
+        <button class="dropdown-item">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          More options…
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item danger">
+          <svg class="dropdown-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          Delete
+          <span class="dropdown-item-shortcut">⌫</span>
+        </button>
+      </div>
+      <div class="code-snippet" id="code-context">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* コンテキストメニュー: position:fixed でカーソル位置に表示 */
+element.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  var menu = document.getElementById('context-menu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top  = e.clientY + 'px';
+  menu.classList.add('open');
+});
+/* 外部クリックで閉じる */
+document.addEventListener('click', function() {
+  document.getElementById('context-menu').classList.remove('open');
+});</code></pre>
+      </div>
+    </div>
+
+  </main><!-- /main-content -->
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ============================================================
+     Dropdown インタラクション
+     ============================================================ */
+  (function setupDropdowns() {
+
+    /* ---- 1. 通常ドロップダウンの開閉 ---- */
+    /* data-dd 属性でラッパー要素のIDを指定 */
+    function toggleDropdown(wrapperId) {
+      var wrapper = document.getElementById(wrapperId);
+      if (!wrapper) return;
+      var isOpen = wrapper.classList.contains('open');
+      /* まず全てのドロップダウンを閉じる */
+      closeAllDropdowns();
+      /* 閉じていた場合のみ開く */
+      if (!isOpen) {
+        wrapper.classList.add('open');
+        var trigger = wrapper.querySelector('[data-dd]');
+        if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        /* フォーカス管理: 開いたら最初のアイテムにフォーカス */
+        var firstItem = wrapper.querySelector('.dropdown-item');
+        if (firstItem) firstItem.focus();
+      }
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-wrapper.open').forEach(function(w) {
+        w.classList.remove('open');
+        var trigger = w.querySelector('[aria-expanded]');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    /* トリガーボタンのクリックイベント */
+    document.querySelectorAll('[data-dd]').forEach(function(trigger) {
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation(); /* 外部クリック判定に伝播させない */
+        toggleDropdown(trigger.getAttribute('data-dd'));
+      });
+    });
+
+    /* ---- 2. 外部クリックで全ドロップダウンを閉じる ---- */
+    document.addEventListener('click', function() {
+      closeAllDropdowns();
+    });
+
+    /* ---- 3. Escape キーで閉じる ---- */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeAllDropdowns();
+    });
+
+    /* ---- 4. ドロップダウン内クリックは伝播を止める ---- */
+    document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
+      menu.addEventListener('click', function(e) {
+        /* チェックボックスアイテムの場合は閉じない */
+        if (e.target.closest('.check-item')) return;
+        e.stopPropagation();
+        /* 通常アイテムクリック後に閉じる */
+        setTimeout(closeAllDropdowns, 80);
+      });
+    });
+
+    /* ---- 5. チェックボックスアイテムのトグル ---- */
+    document.querySelectorAll('.check-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var isChecked = item.getAttribute('data-checked') === 'true';
+        var newState = !isChecked;
+        item.setAttribute('data-checked', newState);
+        item.setAttribute('aria-checked', newState);
+        var checkEl = item.querySelector('.dropdown-item-check');
+        if (checkEl) checkEl.classList.toggle('checked', newState);
+      });
+    });
+
+    /* ---- 6. 検索ドロップダウン ---- */
+    var countries = [
+      'Argentina', 'Australia', 'Brazil', 'Canada', 'Chile', 'China',
+      'Denmark', 'Egypt', 'Finland', 'France', 'Germany', 'India',
+      'Indonesia', 'Italy', 'Japan', 'Kenya', 'Mexico', 'Netherlands',
+      'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru', 'Poland',
+      'Portugal', 'Russia', 'Saudi Arabia', 'South Africa', 'South Korea',
+      'Spain', 'Sweden', 'Switzerland', 'Thailand', 'Turkey',
+      'United Kingdom', 'United States', 'Vietnam'
+    ];
+
+    var countryList = document.getElementById('country-list');
+    var countrySearch = document.getElementById('country-search');
+    var searchDdLabel = document.getElementById('search-dd-label');
+
+    function renderCountries(filter) {
+      if (!countryList) return;
+      filter = (filter || '').toLowerCase();
+      var filtered = countries.filter(function(c) {
+        return c.toLowerCase().includes(filter);
+      });
+      if (filtered.length === 0) {
+        countryList.innerHTML = '<div class="dropdown-empty">No countries found</div>';
+        return;
+      }
+      countryList.innerHTML = filtered.map(function(c) {
+        return '<button class="dropdown-item country-item">' + c + '</button>';
+      }).join('');
+      /* 国アイテムのクリック */
+      countryList.querySelectorAll('.country-item').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (searchDdLabel) searchDdLabel.textContent = btn.textContent;
+          /* 選択後に閉じる */
+          var wrapper = document.getElementById('dd-search');
+          if (wrapper) wrapper.classList.remove('open');
+        });
+      });
+    }
+
+    renderCountries('');
+
+    if (countrySearch) {
+      countrySearch.addEventListener('input', function() {
+        renderCountries(countrySearch.value);
+      });
+      /* 検索ボックスへのクリックはドロップダウンを閉じない */
+      countrySearch.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    /* ---- 7. コンテキストメニュー ---- */
+    var contextArea = document.getElementById('context-demo-area');
+    var contextMenu = document.getElementById('context-menu-popup');
+
+    function closeContextMenu() {
+      if (contextMenu) contextMenu.classList.remove('open');
+    }
+
+    if (contextArea && contextMenu) {
+      contextArea.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        closeAllDropdowns();
+        /* クリック位置にメニューを表示 */
+        var x = e.clientX;
+        var y = e.clientY;
+        /* 画面端のエッジケース: メニューが画面外に出ないよう調整 */
+        var menuW = 200;
+        var menuH = 260;
+        if (x + menuW > window.innerWidth)  x = window.innerWidth  - menuW - 8;
+        if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 8;
+        contextMenu.style.left = x + 'px';
+        contextMenu.style.top  = y + 'px';
+        contextMenu.classList.add('open');
+      });
+
+      /* コンテキストメニュー内クリック */
+      contextMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+        setTimeout(closeContextMenu, 80);
+      });
+
+      document.addEventListener('click', closeContextMenu);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeContextMenu();
+      });
+    }
+
+  })();
+</script>
+</body>
+</html>

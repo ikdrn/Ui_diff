@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forms — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Forms — コンポーネント固有スタイル
+
+       設計方針:
+       フォームは「ユーザーが入力する場所」。
+       状態（normal/focus/error/success/disabled）を色で明確に区別する。
+       エラーは danger色、成功は success色のみ使用し、装飾目的には使わない。
+       ============================================================ */
+
+    /* ---- フォームグループ: ラベル + インプット + ヘルパーをまとめる単位 ---- */
+    .form-group {
+      margin-bottom: 1.25rem; /* グループ間のスペース */
+    }
+
+    /* ラベル: インプットより小さく・明確に */
+    .form-label {
+      display: block; /* blockでインプットと縦並びに */
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+    /* 必須マーク: 赤い*でdanger色を使う（エラーではないが要注意の意） */
+    .form-label .required {
+      color: var(--danger);
+      margin-left: 0.2rem;
+    }
+
+    /* ---- インプット基底スタイル ---- */
+    .form-input {
+      display: block;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1.5px solid var(--border); /* 1.5px: 細すぎず・太すぎず */
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit; /* ページのフォントを継承 */
+      line-height: 1.5;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none; /* デフォルトのoutlineをリセット（focus-visibleで代替） */
+    }
+    .form-input::placeholder { color: var(--text-subtle); }
+    /* フォーカス: primaryボーダー + 薄いshadow ring */
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+    /* エラー状態: danger色のみ */
+    .form-input.error {
+      border-color: var(--danger);
+    }
+    .form-input.error:focus {
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+    }
+    /* 成功状態: success色のみ */
+    .form-input.success {
+      border-color: var(--success);
+    }
+    .form-input.success:focus {
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+    }
+    /* 無効状態: 視覚的に操作不可を示す */
+    .form-input:disabled {
+      background: var(--surface-2);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    /* 読み取り専用: disabled より操作可能に見える（スクロール可） */
+    .form-input[readonly] {
+      background: var(--surface-2);
+      cursor: default;
+    }
+
+    /* ヘルパーテキスト: 補足説明とエラーメッセージ */
+    .form-helper {
+      font-size: 0.78rem;
+      margin-top: 0.35rem;
+      color: var(--text-muted); /* デフォルト: 補足テキスト色 */
+    }
+    .form-helper.error   { color: var(--danger); }  /* エラー時のみdanger */
+    .form-helper.success { color: var(--success); } /* 成功時のみsuccess */
+
+    /* ---- インプット内アイコン ---- */
+    .input-wrapper {
+      position: relative; /* アイコンの絶対配置の基準点 */
+    }
+    .input-icon-left,
+    .input-icon-right {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none; /* アイコンはクリックをinputに透過 */
+    }
+    .input-icon-left { left: 0.75rem; }
+    .input-icon-right { right: 0.75rem; }
+    .input-wrapper .form-input.has-icon-left  { padding-left: 2.5rem; }
+    .input-wrapper .form-input.has-icon-right { padding-right: 2.5rem; }
+
+    /* ---- フローティングラベル ---- */
+    /* ラベルが上に移動することで、フォーカス中もフィールドの意味がわかる */
+    .float-group {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+    .float-input {
+      display: block; width: 100%;
+      padding: 1.4rem 0.75rem 0.4rem; /* 上部にラベルのスペースを確保 */
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .float-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+    .float-label {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+      pointer-events: none; /* ラベルがクリックをinputに透過 */
+      transform-origin: left center;
+    }
+    /* フォーカス時 or 入力済み時: ラベルを上に移動・縮小 */
+    .float-input:focus ~ .float-label,
+    .float-input:not(:placeholder-shown) ~ .float-label {
+      top: 0.5rem;
+      transform: translateY(0) scale(0.78); /* scale()でフォントサイズを小さく */
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ---- セレクト（ドロップダウン選択） ---- */
+    .form-select {
+      display: block; width: 100%;
+      padding: 0.6rem 2.25rem 0.6rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      /* カスタム矢印: 標準の▼を隠してSVGで置換 */
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    /* ---- チェックボックス ---- */
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-label + .checkbox-label { margin-top: 0.5rem; }
+    /* accent-colorでチェックボックスの色をブランド色に統一 */
+    .checkbox-input {
+      width: 16px; height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ---- カード型ラジオ ---- */
+    .radio-card-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .radio-card-label {
+      position: relative;
+      cursor: pointer;
+    }
+    .radio-card-input {
+      position: absolute;
+      opacity: 0; width: 0; height: 0; /* 非表示のまま機能させる */
+    }
+    .radio-card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 1rem 1.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: all var(--transition);
+      min-width: 100px;
+      text-align: center;
+      background: var(--surface);
+    }
+    .radio-card-label:hover .radio-card-body {
+      border-color: var(--border-strong);
+    }
+    /* チェック済み: ブランド色のボーダー + 薄いtint背景 */
+    .radio-card-input:checked ~ .radio-card-body {
+      border-color: var(--primary);
+      background: var(--primary-subtle);
+      color: var(--primary);
+    }
+    .radio-card-icon { font-size: 1.5rem; }
+    .radio-card-text { font-size: 0.82rem; font-weight: 600; }
+
+    /* ---- テキストエリア ---- */
+    .form-textarea {
+      display: block; width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      line-height: 1.6;
+      resize: vertical; /* 縦方向のみリサイズ可能（横は崩れるので禁止）*/
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    /* 文字数カウンター */
+    .char-counter {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      margin-top: 0.35rem;
+    }
+    .char-counter.near-limit { color: var(--warning); }
+    .char-counter.over-limit { color: var(--danger); }
+
+    /* ---- ファイルアップロード ---- */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--surface);
+    }
+    .drop-zone:hover {
+      border-color: var(--primary-border);
+      background: var(--primary-subtle);
+    }
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-subtle);
+    }
+    .drop-zone-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-subtle);
+    }
+    .drop-zone-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .drop-zone-sub {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+    }
+    /* 実際のinputは非表示: drop-zone全体をクリック可能にする */
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+
+    /* ---- バリデーション付きフォーム例 ---- */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ---- 汎用ボタン（フォーム内で使う）---- */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.6rem 1.25rem; border-radius: var(--radius);
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--surface-2); }
+  </style>
+</head>
+<body>
+
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
+    <span>Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="メニューを開く">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">☀</span>
+    <label class="theme-toggle"><input type="checkbox" id="theme-toggle"><div class="theme-toggle-track"></div><div class="theme-toggle-thumb"></div></label>
+    <span class="header-theme-label">☾</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="layout-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+    <a href="../index.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+    <a href="buttons.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>Buttons</a>
+    <a href="cards.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>Cards</a>
+    <a href="forms.html" class="sidebar-link active"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>Forms</a>
+    <a href="navbars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>Navbars</a>
+    <a href="heroes.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>Heroes</a>
+    <a href="footers.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>Footers</a>
+    <a href="modals.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>Modals</a>
+    <a href="tables.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>Tables</a>
+    <a href="badges.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>Badges</a>
+    <a href="alerts.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alerts</a>
+    <a href="tabs.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>Tabs</a>
+    <a href="accordions.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>Accordions</a>
+    <a href="breadcrumbs.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>Breadcrumbs</a>
+    <a href="pagination.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>Pagination</a>
+    <a href="tooltips.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Tooltips</a>
+    <a href="dropdowns.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>Dropdowns</a>
+    <a href="sidebars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>Sidebars</a>
+    <a href="loaders.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loaders</a>
+    <a href="toggles.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>Toggles</a>
+    <a href="avatars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Avatars</a>
+  </aside>
+
+  <main class="main-content">
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Forms</span>
+    </nav>
+
+    <div class="page-title-block">
+      <h1>Forms</h1>
+      <p>テキスト入力・セレクト・ファイルアップロードなど、ユーザー入力のためのコンポーネント集。状態（通常/フォーカス/エラー/成功/無効）を色で明確に区別する。</p>
+    </div>
+
+    <!-- 1. テキストインプットの状態 -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">1. テキストインプットの状態</span>
+          <div style="font-size:0.78rem;color:var(--text-subtle);margin-top:0.15rem;">
+            5つの状態を視覚的に区別する。エラーはdanger色、成功はsuccess色のみ使用。
+          </div>
+        </div>
+        <button class="show-code-btn" data-target="code-inputs">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding: 1.5rem; max-width: 400px;">
+        <div class="form-group">
+          <label class="form-label">通常 (Normal)</label>
+          <input type="text" class="form-input" placeholder="入力してください">
+        </div>
+        <div class="form-group">
+          <label class="form-label">フォーカス中 (Focus) — クリックで確認</label>
+          <input type="text" class="form-input" placeholder="クリックしてフォーカス">
+        </div>
+        <div class="form-group">
+          <label class="form-label">エラー (Error)</label>
+          <input type="email" class="form-input error" value="invalid-email">
+          <div class="form-helper error">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            有効なメールアドレスを入力してください
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">成功 (Success)</label>
+          <input type="text" class="form-input success" value="yamada@example.com">
+          <div class="form-helper success">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>
+            利用可能なメールアドレスです
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">無効 (Disabled)</label>
+          <input type="text" class="form-input" value="編集できません" disabled>
+          <div class="form-helper">このフィールドは変更できません</div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-inputs">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- 通常 --&gt;
+&lt;input type="text" class="form-input" placeholder="入力"&gt;
+
+&lt;!-- エラー --&gt;
+&lt;input type="text" class="form-input error"&gt;
+&lt;div class="form-helper error"&gt;エラーメッセージ&lt;/div&gt;
+
+&lt;!-- 成功 --&gt;
+&lt;input type="text" class="form-input success"&gt;
+&lt;div class="form-helper success"&gt;成功メッセージ&lt;/div&gt;
+
+&lt;!-- 無効 --&gt;
+&lt;input type="text" class="form-input" disabled&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 2. フローティングラベル -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">2. フローティングラベル</span>
+          <div style="font-size:0.78rem;color:var(--text-subtle);margin-top:0.15rem;">
+            フォーカス時や入力済み時にラベルが上に移動。省スペースかつフォーカス中もラベルが見える。
+          </div>
+        </div>
+        <button class="show-code-btn" data-target="code-float">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body surface" style="padding: 1.5rem; flex-direction: column; max-width: 400px;">
+        <div class="float-group">
+          <input type="text" class="float-input" id="float-name" placeholder=" ">
+          <label class="float-label" for="float-name">お名前</label>
+        </div>
+        <div class="float-group">
+          <input type="email" class="float-input" id="float-email" placeholder=" " value="test@example.com">
+          <label class="float-label" for="float-email">メールアドレス</label>
+        </div>
+        <div class="float-group">
+          <input type="password" class="float-input" id="float-pass" placeholder=" ">
+          <label class="float-label" for="float-pass">パスワード</label>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-float">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* CSS */
+.float-group { position: relative; }
+.float-input { padding: 1.4rem 0.75rem 0.4rem; }
+.float-label {
+  position: absolute; left: 0.75rem; top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.15s ease;
+  pointer-events: none;
+}
+.float-input:focus ~ .float-label,
+.float-input:not(:placeholder-shown) ~ .float-label {
+  top: 0.5rem; transform: translateY(0) scale(0.78);
+  color: var(--primary);
+}
+
+&lt;!-- HTML: placeholder=" " (空白) が必須 --&gt;
+&lt;div class="float-group"&gt;
+  &lt;input type="text" class="float-input" placeholder=" "&gt;
+  &lt;label class="float-label"&gt;ラベル&lt;/label&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 3. アイコン付きインプット -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. アイコン付きインプット</span>
+        <button class="show-code-btn" data-target="code-icon-input">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding: 1.5rem; max-width: 400px;">
+        <div class="form-group">
+          <label class="form-label">検索</label>
+          <div class="input-wrapper">
+            <svg class="input-icon-left" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="form-input has-icon-left" placeholder="コンポーネントを検索...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <div class="input-wrapper">
+            <svg class="input-icon-left" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" class="form-input has-icon-left" placeholder="yamada@example.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">金額</label>
+          <div class="input-wrapper">
+            <svg class="input-icon-left" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            <input type="number" class="form-input has-icon-left has-icon-right" placeholder="0">
+            <span class="input-icon-right" style="font-size:0.85rem;font-weight:600;pointer-events:none;">JPY</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-icon-input">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="input-wrapper"&gt;
+  &lt;svg class="input-icon-left" ...&gt;...&lt;/svg&gt;
+  &lt;input type="text" class="form-input has-icon-left" placeholder="..."&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 4. セレクト -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. セレクト（ドロップダウン選択）</span>
+        <button class="show-code-btn" data-target="code-select">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding: 1.5rem; max-width: 400px;">
+        <div class="form-group">
+          <label class="form-label">都道府県</label>
+          <select class="form-select">
+            <option value="">選択してください</option>
+            <option value="tokyo">東京都</option>
+            <option value="osaka">大阪府</option>
+            <option value="kanagawa">神奈川県</option>
+            <option value="aichi">愛知県</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">カテゴリ <span class="required">*</span></label>
+          <select class="form-select" required>
+            <option value="">必須: カテゴリを選択</option>
+            <option value="design">デザイン</option>
+            <option value="dev">開発</option>
+            <option value="pm">プロジェクト管理</option>
+          </select>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-select">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;select class="form-select"&gt;
+  &lt;option value=""&gt;選択してください&lt;/option&gt;
+  &lt;option value="a"&gt;選択肢A&lt;/option&gt;
+  &lt;option value="b"&gt;選択肢B&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 5. チェックボックス＆ラジオカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. チェックボックス ＆ カード型ラジオ</span>
+        <button class="show-code-btn" data-target="code-check">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="gap:2rem; align-items: flex-start; flex-wrap: wrap;">
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:0.75rem;">チェックボックス</div>
+          <label class="checkbox-label"><input type="checkbox" class="checkbox-input" checked> デザインレビュー</label>
+          <label class="checkbox-label"><input type="checkbox" class="checkbox-input"> 実装レビュー</label>
+          <label class="checkbox-label"><input type="checkbox" class="checkbox-input" disabled> アーカイブ済み（無効）</label>
+        </div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:0.75rem;">カード型ラジオ</div>
+          <div class="radio-card-group">
+            <label class="radio-card-label">
+              <input type="radio" name="plan" class="radio-card-input" value="monthly" checked>
+              <div class="radio-card-body">
+                <span class="radio-card-icon">📅</span>
+                <span class="radio-card-text">月払い</span>
+              </div>
+            </label>
+            <label class="radio-card-label">
+              <input type="radio" name="plan" class="radio-card-input" value="yearly">
+              <div class="radio-card-body">
+                <span class="radio-card-icon">🎯</span>
+                <span class="radio-card-text">年払い</span>
+              </div>
+            </label>
+            <label class="radio-card-label">
+              <input type="radio" name="plan" class="radio-card-input" value="custom">
+              <div class="radio-card-body">
+                <span class="radio-card-icon">✦</span>
+                <span class="radio-card-text">カスタム</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-check">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- チェックボックス --&gt;
+&lt;label class="checkbox-label"&gt;
+  &lt;input type="checkbox" class="checkbox-input"&gt;
+  ラベルテキスト
+&lt;/label&gt;
+
+&lt;!-- カード型ラジオ --&gt;
+&lt;label class="radio-card-label"&gt;
+  &lt;input type="radio" name="plan" class="radio-card-input" value="monthly"&gt;
+  &lt;div class="radio-card-body"&gt;
+    &lt;span class="radio-card-icon"&gt;📅&lt;/span&gt;
+    &lt;span class="radio-card-text"&gt;月払い&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 6. テキストエリア + 文字数カウンター -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. テキストエリア ＋ 文字数カウンター</span>
+        <button class="show-code-btn" data-target="code-textarea">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding:1.5rem; max-width:480px;">
+        <div class="form-group">
+          <label class="form-label">コメント（最大200文字）</label>
+          <textarea class="form-textarea" id="comment-area" rows="4"
+            placeholder="コメントを入力してください..." maxlength="200"></textarea>
+          <div class="char-counter" id="char-count">0 / 200</div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-textarea">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;textarea class="form-textarea" id="comment" rows="4"
+  maxlength="200" placeholder="..."&gt;&lt;/textarea&gt;
+&lt;div class="char-counter" id="char-count"&gt;0 / 200&lt;/div&gt;
+
+&lt;script&gt;
+document.getElementById('comment').addEventListener('input', function() {
+  const len = this.value.length;
+  const el  = document.getElementById('char-count');
+  el.textContent = len + ' / 200';
+  el.className = 'char-counter' +
+    (len &gt; 180 ? ' near-limit' : '') +
+    (len &gt;= 200 ? ' over-limit' : '');
+});
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 7. ファイルアップロード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. ドラッグ＆ドロップ ファイルアップロード</span>
+        <button class="show-code-btn" data-target="code-upload">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding:1.5rem; max-width:480px;">
+        <label class="drop-zone" id="drop-zone">
+          <input type="file" multiple accept=".jpg,.png,.pdf">
+          <div class="drop-zone-icon">⬆</div>
+          <div class="drop-zone-text">ファイルをドロップまたはクリックして選択</div>
+          <div class="drop-zone-sub">JPG, PNG, PDF · 最大 10MB</div>
+        </label>
+        <div id="file-list" style="margin-top:0.75rem;font-size:0.82rem;color:var(--text-muted);"></div>
+      </div>
+      <div class="code-snippet" id="code-upload">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;label class="drop-zone" id="drop-zone"&gt;
+  &lt;input type="file" multiple accept=".jpg,.png,.pdf"&gt;
+  &lt;div class="drop-zone-icon"&gt;⬆&lt;/div&gt;
+  &lt;div class="drop-zone-text"&gt;ドロップまたはクリックして選択&lt;/div&gt;
+  &lt;div class="drop-zone-sub"&gt;JPG, PNG, PDF · 最大10MB&lt;/div&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 8. バリデーション付きフォーム例 -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">8. バリデーション付きフォーム（送信例）</span>
+        <button class="show-code-btn" data-target="code-validation">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body surface" style="padding:1.5rem;">
+        <form id="demo-form" novalidate style="max-width:480px;width:100%;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-last">姓 <span class="required">*</span></label>
+              <input type="text" id="f-last" class="form-input" placeholder="山田">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-first">名 <span class="required">*</span></label>
+              <input type="text" id="f-first" class="form-input" placeholder="太郎">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-email">メールアドレス <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <svg class="input-icon-left" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input type="email" id="f-email" class="form-input has-icon-left" placeholder="yamada@example.com">
+            </div>
+            <div class="form-helper" id="email-helper"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-msg">メッセージ</label>
+            <textarea id="f-msg" class="form-textarea" rows="3" placeholder="お問い合わせ内容を入力"></textarea>
+          </div>
+          <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('demo-form').reset()">リセット</button>
+            <button type="submit" class="btn btn-primary">送信する</button>
+          </div>
+        </form>
+      </div>
+      <div class="code-snippet" id="code-validation">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;form id="demo-form" novalidate&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label class="form-label"&gt;メール &lt;span class="required"&gt;*&lt;/span&gt;&lt;/label&gt;
+    &lt;input type="email" id="email" class="form-input"&gt;
+    &lt;div class="form-helper" id="email-helper"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button type="submit" class="btn btn-primary"&gt;送信&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../js/main.js"></script>
+<script>
+  /* ---- 文字数カウンター ---- */
+  (function() {
+    const area  = document.getElementById('comment-area');
+    const count = document.getElementById('char-count');
+    if (!area || !count) return;
+    const max = parseInt(area.getAttribute('maxlength')) || 200;
+    area.addEventListener('input', function() {
+      const len = this.value.length;
+      count.textContent = len + ' / ' + max;
+      count.className = 'char-counter' +
+        (len > max * 0.9 ? ' near-limit' : '') +
+        (len >= max      ? ' over-limit' : '');
+    });
+  })();
+
+  /* ---- ドラッグ＆ドロップ ---- */
+  (function() {
+    const zone = document.getElementById('drop-zone');
+    const list = document.getElementById('file-list');
+    if (!zone) return;
+
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      showFiles(e.dataTransfer.files);
+    });
+    zone.querySelector('input').addEventListener('change', function() {
+      showFiles(this.files);
+    });
+
+    function showFiles(files) {
+      if (!list) return;
+      list.innerHTML = [...files].map(f =>
+        `<div style="padding:0.3rem 0;display:flex;align-items:center;gap:0.5rem;">
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+           ${f.name} <span style="color:var(--text-subtle);">(${(f.size/1024).toFixed(1)} KB)</span>
+         </div>`
+      ).join('');
+    }
+  })();
+
+  /* ---- フォームバリデーション ---- */
+  (function() {
+    const form = document.getElementById('demo-form');
+    if (!form) return;
+    const emailInput  = document.getElementById('f-email');
+    const emailHelper = document.getElementById('email-helper');
+
+    emailInput.addEventListener('blur', function() {
+      const val = this.value.trim();
+      if (!val) {
+        this.classList.remove('success','error');
+        emailHelper.className = 'form-helper';
+        emailHelper.textContent = '';
+        return;
+      }
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      this.classList.toggle('error', !isValid);
+      this.classList.toggle('success', isValid);
+      emailHelper.className = 'form-helper ' + (isValid ? 'success' : 'error');
+      emailHelper.textContent = isValid
+        ? '✓ 有効なメールアドレスです'
+        : '✗ 有効なメールアドレスを入力してください';
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const last  = document.getElementById('f-last').value.trim();
+      const first = document.getElementById('f-first').value.trim();
+      const email = emailInput.value.trim();
+      if (!last || !first || !email) {
+        alert('必須項目を入力してください');
+        return;
+      }
+      alert(`送信完了！\n${last} ${first} 様 (${email})`);
+    });
+  })();
+</script>
+</body>
+</html>
