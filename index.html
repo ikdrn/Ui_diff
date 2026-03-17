@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Frontend Design Catalog</title>
+  <title>UI比較集</title>
   <link rel="stylesheet" href="styles/global.css">
   <style>
     /* ============================================================
@@ -75,6 +75,46 @@
     }
     .empty-state p { font-size: 0.9rem; }
 
+    /* 簡易比較メモ（実際に入力・保存できるデモ処理） */
+    .quick-note {
+      margin: 0.75rem 0 1.25rem;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    .quick-note-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .quick-note-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .quick-note textarea {
+      width: 100%;
+      min-height: 84px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 0.65rem;
+      resize: vertical;
+      font: inherit;
+    }
+    .quick-note-meta {
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+
     /* カテゴリセクション */
     .catalog-category {
       margin-bottom: 2.5rem;
@@ -113,7 +153,7 @@
         <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
       </svg>
     </div>
-    <span>Design Catalog</span>
+    <span>UI比較集</span>
   </a>
 
   <div class="header-right">
@@ -169,6 +209,17 @@
           <button class="filter-tab" data-filter="content">コンテンツ</button>
           <button class="filter-tab" data-filter="input">入力・操作</button>
           <button class="filter-tab" data-filter="feedback">フィードバック</button>
+        </div>
+      </div>
+
+
+      <div class="quick-note" aria-live="polite">
+        <p class="quick-note-title">比較メモ（自動保存）</p>
+        <p class="quick-note-desc">気になったUIの使い道をメモできます。入力内容はこのブラウザに自動保存されます。</p>
+        <textarea id="quick-note-input" placeholder="例: カードは料金プランで使用、モーダルは確認ダイアログで使用"></textarea>
+        <div class="quick-note-meta">
+          <span id="quick-note-count">0文字</span>
+          <span id="quick-note-status">未保存</span>
         </div>
       </div>
 
@@ -565,7 +616,7 @@
 
 <footer class="site-footer">
   <div class="container">
-    <p>Frontend Design Catalog — HTML / CSS / Vanilla JS のみ。外部依存なし。</p>
+    <p>UI比較集 — HTML / CSS / Vanilla JS のみ。外部依存なし。</p>
   </div>
 </footer>
 
@@ -584,6 +635,10 @@
   const allCategories = document.querySelectorAll('.catalog-category');
   const emptyState    = document.getElementById('empty-state');
   const emptyQuery    = document.getElementById('empty-query');
+
+  const quickNoteInput = document.getElementById('quick-note-input');
+  const quickNoteCount = document.getElementById('quick-note-count');
+  const quickNoteStatus = document.getElementById('quick-note-status');
 
   let currentFilter = 'all';  // 現在選択中のカテゴリフィルター
 
@@ -625,6 +680,23 @@
     }
   }
 
+
+  function setupQuickNote() {
+    if (!quickNoteInput) return;
+
+    const saved = localStorage.getItem('ui-compare-note') || '';
+    quickNoteInput.value = saved;
+    quickNoteCount.textContent = `${saved.length}文字`;
+    quickNoteStatus.textContent = saved ? '保存済み' : '未保存';
+
+    quickNoteInput.addEventListener('input', () => {
+      const value = quickNoteInput.value;
+      localStorage.setItem('ui-compare-note', value);
+      quickNoteCount.textContent = `${value.length}文字`;
+      quickNoteStatus.textContent = '保存済み';
+    });
+  }
+
   /* 検索入力 */
   searchInput.addEventListener('input', updateVisibility);
 
@@ -637,6 +709,9 @@
       updateVisibility();
     });
   });
+
+  setupQuickNote();
+  updateVisibility();
 </script>
 </body>
 </html>

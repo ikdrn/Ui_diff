@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cards — Frontend Design Catalog</title>
+  <title>Cards — UI比較集</title>
   <link rel="stylesheet" href="../styles/global.css">
   <style>
     /* ============================================================
@@ -403,7 +403,7 @@
         <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
       </svg>
     </div>
-    <span>Design Catalog</span>
+    <span>UI比較集</span>
   </a>
   <div class="header-right">
     <button class="menu-toggle" id="menu-toggle" aria-label="メニューを開く">
@@ -467,7 +467,7 @@
         <div>
           <span class="demo-block-title">1. 基本カード</span>
         </div>
-        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-basic">▶ コードを表示</button>
       </div>
       <div class="demo-block-body" style="align-items: flex-start;">
         <div class="card" style="width: 260px;">
@@ -491,7 +491,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-basic">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="card"&gt;
   &lt;img class="card-img" src="image.jpg" alt="..."&gt;
   &lt;div class="card-body"&gt;
@@ -508,7 +508,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">2. プロフィールカード</span>
-        <button class="show-code-btn" data-target="code-profile">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-profile">▶ コードを表示</button>
       </div>
       <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap;">
         <div class="card" style="width: 240px;">
@@ -535,7 +535,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-profile">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="card"&gt;
   &lt;div class="profile-card"&gt;
     &lt;div class="profile-avatar"&gt;KT&lt;/div&gt;
@@ -562,7 +562,7 @@
             ダッシュボードのKPI表示に使う。トレンドは成功色(↑)・危険色(↓)のみで意味を持たせる。
           </div>
         </div>
-        <button class="show-code-btn" data-target="code-stat">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-stat">▶ コードを表示</button>
       </div>
       <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
         <div class="card" style="width: 200px;">
@@ -612,7 +612,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-stat">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="card"&gt;
   &lt;div class="stat-card"&gt;
     &lt;div class="stat-card-header"&gt;
@@ -630,7 +630,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">4. 料金プランカード</span>
-        <button class="show-code-btn" data-target="code-pricing">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-pricing">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column surface" style="padding: 1.5rem;">
         <div class="pricing-grid">
@@ -686,7 +686,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-pricing">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;!-- 推奨プランに .featured を付ける --&gt;
 &lt;div class="pricing-card featured"&gt;
   &lt;div class="pricing-card-header"&gt;
@@ -708,7 +708,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">5. 横並びカード</span>
-        <button class="show-code-btn" data-target="code-horizontal">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-horizontal">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
         <div class="card horizontal-card" style="max-width: 480px;">
@@ -722,7 +722,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-horizontal">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="card horizontal-card"&gt;
   &lt;div class="horizontal-card-img"&gt;...&lt;/div&gt;
   &lt;div class="horizontal-card-body"&gt;
@@ -742,7 +742,7 @@
             データ取得中はスケルトンを表示。レイアウトシフトを防ぎ、何かが来ることを示す。
           </div>
         </div>
-        <button class="show-code-btn" data-target="code-skeleton">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-skeleton">▶ コードを表示</button>
       </div>
       <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap;">
         <div class="card" style="width: 240px;">
@@ -770,7 +770,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-skeleton">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>/* CSS */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
@@ -805,7 +805,7 @@
             ホバーで裏面が表示される。表: 概要 / 裏: 詳細・アクション という使い方が典型。
           </div>
         </div>
-        <button class="show-code-btn" data-target="code-flip">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-flip">▶ コードを表示</button>
       </div>
       <div class="demo-block-body" style="padding: 2rem 1.5rem;">
         <div class="flip-card-wrapper">
@@ -828,7 +828,7 @@
         </div>
       </div>
       <div class="code-snippet" id="code-flip">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>/* CSS */
 .flip-card-wrapper { perspective: 800px; }
 .flip-card-inner {

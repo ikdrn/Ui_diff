@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="ja" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alerts — Frontend Design Catalog</title>
+  <title>Alerts — UI比較集</title>
   <link rel="stylesheet" href="../styles/global.css">
   <style>
     /* ============================================================
@@ -359,7 +359,7 @@
 <header class="global-header">
   <a href="../index.html" class="header-logo">
     <div class="header-logo-icon">✦</div>
-    <span>Frontend Design Catalog</span>
+    <span>UI比較集</span>
   </a>
 
   <div class="header-right">
@@ -507,7 +507,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">1. Basic Alert (4 types)</span>
-        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-basic">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -549,7 +549,7 @@
 
       </div>
       <div class="code-snippet" id="code-basic">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="alert alert-success" role="alert"&gt;
   &lt;div class="alert-icon"&gt;...svg...&lt;/div&gt;
   &lt;div class="alert-body"&gt;
@@ -565,7 +565,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">2. Alert with Icon (title + message)</span>
-        <button class="show-code-btn" data-target="code-icon-alert">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-icon-alert">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -601,7 +601,7 @@
 
       </div>
       <div class="code-snippet" id="code-icon-alert">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="alert alert-success" role="alert"&gt;
   &lt;div style="width:36px;height:36px;border-radius:50%;background:var(--success);
               display:flex;align-items:center;justify-content:center;"&gt;
@@ -621,7 +621,7 @@
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">3. Alert with Close Button</span>
-        <button class="show-code-btn" data-target="code-close">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-close">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column" id="dismissible-demo">
 
@@ -652,7 +652,7 @@
         <button class="replay-btn" id="reset-dismissible">↺ Reset alerts</button>
       </div>
       <div class="code-snippet" id="code-close">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="alert alert-success alert-dismissible" role="alert"&gt;
   ...content...
   &lt;button class="alert-close-btn" onclick="dismissAlert(this)"&gt;×&lt;/button&gt;
@@ -674,7 +674,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">4. Alert with Action Button</span>
-        <button class="show-code-btn" data-target="code-action">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-action">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -719,7 +719,7 @@ function dismissAlert(btn) {
 
       </div>
       <div class="code-snippet" id="code-action">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="alert alert-info" role="alert"&gt;
   ...icon...
   &lt;div class="alert-body"&gt;
@@ -739,7 +739,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">5. Toast Notifications</span>
-        <button class="show-code-btn" data-target="code-toast">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-toast">▶ コードを表示</button>
       </div>
       <div class="demo-block-body">
         <div class="toast-trigger-row">
@@ -762,7 +762,7 @@ function dismissAlert(btn) {
         </div>
       </div>
       <div class="code-snippet" id="code-toast">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>function showToast(type, title, message) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -787,7 +787,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">6. Banner Alert</span>
-        <button class="show-code-btn" data-target="code-banner">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-banner">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -819,7 +819,7 @@ function dismissAlert(btn) {
 
       </div>
       <div class="code-snippet" id="code-banner">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="alert-banner alert-banner-warning"&gt;
   &lt;svg ...&gt;&lt;/svg&gt;
   &lt;span&gt;Your trial ends in 3 days.&lt;/span&gt;
@@ -835,7 +835,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">7. Inline Alert</span>
-        <button class="show-code-btn" data-target="code-inline">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-inline">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -869,7 +869,7 @@ function dismissAlert(btn) {
 
       </div>
       <div class="code-snippet" id="code-inline">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="demo-field"&gt;
   &lt;label&gt;Email address&lt;/label&gt;
   &lt;input type="email" value="notanemail"&gt;
@@ -886,7 +886,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">8. Animated Alert</span>
-        <button class="show-code-btn" data-target="code-animated">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-animated">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column" id="animated-demo">
 
@@ -914,7 +914,7 @@ function dismissAlert(btn) {
         <button class="replay-btn" id="replay-animated">↺ Replay animations</button>
       </div>
       <div class="code-snippet" id="code-animated">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>/* CSS keyframe — slide from top */
 .alert-slide {
   animation: slide-from-top 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
@@ -934,7 +934,7 @@ function dismissAlert(btn) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">9. Alert with Progress Bar (auto-dismiss)</span>
-        <button class="show-code-btn" data-target="code-progress">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-progress">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column" id="progress-demo">
 
@@ -964,7 +964,7 @@ function dismissAlert(btn) {
 
       </div>
       <div class="code-snippet" id="code-progress">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>/* The progress bar shrinks from 100% → 0% over N seconds */
 function startProgressAlert(alertEl, barEl, duration = 5000) {
   barEl.style.transition = `width ${duration}ms linear`;
@@ -986,7 +986,7 @@ function startProgressAlert(alertEl, barEl, duration = 5000) {
     <div class="demo-block">
       <div class="demo-block-header">
         <span class="demo-block-title">10. Stacked Alerts</span>
-        <button class="show-code-btn" data-target="code-stacked">▶ Show Code</button>
+        <button class="show-code-btn" data-target="code-stacked">▶ コードを表示</button>
       </div>
       <div class="demo-block-body column">
 
@@ -1042,7 +1042,7 @@ function startProgressAlert(alertEl, barEl, duration = 5000) {
 
       </div>
       <div class="code-snippet" id="code-stacked">
-        <button class="copy-btn">Copy</button>
+        <button class="copy-btn">コピー</button>
         <pre><code>&lt;div class="stacked-alerts"&gt;
   &lt;div class="alert alert-success alert-dismissible"&gt;...&lt;/div&gt;
   &lt;div class="alert alert-info    alert-dismissible"&gt;...&lt;/div&gt;

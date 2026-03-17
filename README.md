@@ -1,4 +1,4 @@
-# Frontend Design Catalog
+# UI比較集
 
 外部ライブラリ・フレームワーク不使用。HTML・CSS・Vanilla JSだけで実装された、
 コピー&ペーストで即使えるUIコンポーネント集。
@@ -210,7 +210,7 @@ cp components/badges.html components/newcomponent.html
 ### Step 2: メタ情報を更新
 
 ```html
-<title>NewComponent — Frontend Design Catalog</title>
+<title>NewComponent — UI比較集</title>
 ```
 
 ### Step 3: サイドバーのアクティブリンクを変更
@@ -246,13 +246,13 @@ cp components/badges.html components/newcomponent.html
       <span class="demo-block-title">1. バリアント名</span>
       <!-- いつ使うかの説明（省略可だが推奨）-->
     </div>
-    <button class="show-code-btn" data-target="code-variant-1">▶ Show Code</button>
+    <button class="show-code-btn" data-target="code-variant-1">▶ コードを表示</button>
   </div>
   <div class="demo-block-body">
     <!-- 実際のコンポーネントをここに配置 -->
   </div>
   <div class="code-snippet" id="code-variant-1">
-    <button class="copy-btn">Copy</button>
+    <button class="copy-btn">コピー</button>
     <pre><code><!-- コピー用の最小コード例 --></code></pre>
   </div>
 </div>
