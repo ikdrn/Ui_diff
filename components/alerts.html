@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerts — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Alerts page — component-specific styles
+       ============================================================ */
+
+    /* ---- Shared alert base ---- */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+    .alert-icon {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .alert-icon svg { width: 18px; height: 18px; }
+    .alert-body { flex: 1; min-width: 0; }
+    .alert-title {
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    .alert-msg { color: inherit; opacity: 0.85; font-size: 0.875rem; }
+
+    /* ---- 1 & 2. Basic + Icon Alert color schemes ---- */
+    .alert-success {
+      background: rgba(16,185,129,0.1);
+      border-color: rgba(16,185,129,0.3);
+      color: #065f46;
+    }
+    [data-theme="dark"] .alert-success { color: #6ee7b7; }
+
+    .alert-error {
+      background: rgba(239,68,68,0.1);
+      border-color: rgba(239,68,68,0.3);
+      color: #991b1b;
+    }
+    [data-theme="dark"] .alert-error { color: #fca5a5; }
+
+    .alert-warning {
+      background: rgba(245,158,11,0.1);
+      border-color: rgba(245,158,11,0.3);
+      color: #92400e;
+    }
+    [data-theme="dark"] .alert-warning { color: #fcd34d; }
+
+    .alert-info {
+      background: rgba(59,130,246,0.1);
+      border-color: rgba(59,130,246,0.3);
+      color: #1e40af;
+    }
+    [data-theme="dark"] .alert-info { color: #93c5fd; }
+
+    /* ---- 3. Alert with Close Button ---- */
+    .alert-dismissible {
+      position: relative;
+    }
+    .alert-close-btn {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+      opacity: 0.6;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: opacity var(--transition), background var(--transition);
+      margin-top: 0;
+    }
+    .alert-close-btn:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+    .alert-dismissible.hiding {
+      animation: alert-fade-out 0.3s ease forwards;
+    }
+    @keyframes alert-fade-out {
+      to { opacity: 0; transform: translateY(-6px); max-height: 0; padding: 0; margin: 0; overflow: hidden; }
+    }
+
+    /* ---- 4. Alert with Action Button ---- */
+    .alert-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.6rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius);
+      border: 1.5px solid currentColor;
+      background: transparent;
+      color: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .alert-action-btn:hover { background: rgba(0,0,0,0.08); }
+
+    /* ---- 5. Toast Notifications ---- */
+    #toast-container {
+      position: fixed;
+      top: calc(var(--header-height) + 1rem);
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      z-index: 2000;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-size: 0.875rem;
+      min-width: 280px;
+      max-width: 360px;
+      background: var(--surface);
+      box-shadow: var(--shadow-lg);
+      pointer-events: all;
+      animation: toast-slide-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .toast.toast-success { border-left: 4px solid var(--success); }
+    .toast.toast-error   { border-left: 4px solid var(--danger);  }
+    .toast.toast-warning { border-left: 4px solid var(--warning); }
+    .toast.toast-info    { border-left: 4px solid var(--info);    }
+
+    .toast-icon { flex-shrink: 0; margin-top: 1px; }
+    .toast-icon svg { width: 18px; height: 18px; }
+
+    .toast-body { flex: 1; }
+    .toast-title { font-weight: 700; font-size: 0.875rem; color: var(--text); margin-bottom: 0.1rem; }
+    .toast-msg   { font-size: 0.8rem; color: var(--text-muted); }
+
+    .toast-close {
+      flex-shrink: 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 1rem;
+      line-height: 1; padding: 0; margin-top: 1px;
+      transition: color var(--transition);
+    }
+    .toast-close:hover { color: var(--text); }
+
+    .toast.removing {
+      animation: toast-slide-out 0.3s ease forwards;
+    }
+
+    @keyframes toast-slide-in {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes toast-slide-out {
+      from { opacity: 1; transform: translateX(0); max-height: 100px; }
+      to   { opacity: 0; transform: translateX(40px); max-height: 0; padding: 0; margin: 0; overflow: hidden; }
+    }
+
+    /* Toast trigger buttons */
+    .toast-trigger-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .btn-toast {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      color: #fff;
+    }
+    .btn-toast:hover { opacity: 0.88; }
+    .btn-toast-success { background: var(--success); }
+    .btn-toast-error   { background: var(--danger);  }
+    .btn-toast-warning { background: var(--warning); }
+    .btn-toast-info    { background: var(--info);    }
+
+    /* ---- 6. Banner Alert ---- */
+    .alert-banner {
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      position: relative;
+    }
+    .alert-banner-success { background: var(--success); color: #fff; }
+    .alert-banner-warning { background: var(--warning); color: #fff; }
+    .alert-banner-info    { background: var(--info);    color: #fff; }
+    .alert-banner-dark    { background: var(--dark);    color: #fff; }
+    .alert-banner svg     { flex-shrink: 0; width: 18px; height: 18px; }
+    .alert-banner-action {
+      margin-left: auto;
+      padding: 0.25rem 0.7rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .alert-banner-action:hover { background: rgba(255,255,255,0.4); }
+    .alert-banner-close {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.8); font-size: 1.1rem;
+      line-height: 1; padding: 0; margin-left: 0.5rem;
+      flex-shrink: 0;
+      transition: color var(--transition);
+    }
+    .alert-banner-close:hover { color: #fff; }
+
+    /* ---- 7. Inline Alert ---- */
+    .alert-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .alert-inline svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .alert-inline-error   { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+    .alert-inline-success { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #065f46; }
+    .alert-inline-warning { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #92400e; }
+    [data-theme="dark"] .alert-inline-error   { color: #fca5a5; }
+    [data-theme="dark"] .alert-inline-success { color: #6ee7b7; }
+    [data-theme="dark"] .alert-inline-warning { color: #fcd34d; }
+
+    /* Demo form field for inline alert */
+    .demo-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      width: 100%;
+      max-width: 360px;
+    }
+    .demo-field label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .demo-field input {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    }
+
+    /* ---- 8. Animated Alert (slide in from top) ---- */
+    .alert-slide {
+      animation: slide-from-top 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes slide-from-top {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-slide-left {
+      animation: slide-from-left 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes slide-from-left {
+      from { opacity: 0; transform: translateX(-28px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .alert-bounce {
+      animation: bounce-in 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes bounce-in {
+      0%   { opacity: 0; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Replay button */
+    .replay-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .replay-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ---- 9. Alert with Progress Bar ---- */
+    .alert-progress-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .alert-progress-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 4px;
+      background: var(--success);
+      border-radius: 0 0 var(--radius) var(--radius);
+      transition: width linear;
+    }
+    .alert-error .alert-progress-bar  { background: var(--danger); }
+    .alert-info .alert-progress-bar   { background: var(--info); }
+    .alert-warning .alert-progress-bar { background: var(--warning); }
+
+    /* ---- 10. Stacked Alerts ---- */
+    .stacked-alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* ---- Page title ---- */
+    .page-title-block { margin-bottom: 2rem; }
+    .page-title-block h1 { font-size: 1.9rem; font-weight: 800; color: var(--text); margin-bottom: 0.35rem; }
+    .page-title-block p { font-size: 0.95rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Toast container (fixed, top-right) -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- ============================================================
+     Layout Wrapper
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- ============================================================
+       Left Sidebar
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+
+    <a href="../index.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </aside>
+
+  <!-- ============================================================
+       Main Content
+       ============================================================ -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Alerts</span>
+    </nav>
+
+    <!-- Page title -->
+    <div class="page-title-block">
+      <h1>Alerts</h1>
+      <p>Notifications, banners, toasts, and inline messages. Ten variants — all built with pure HTML, CSS &amp; Vanilla JS.</p>
+    </div>
+
+    <!-- ======================================================
+         1. Basic Alert (4 types)
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Basic Alert (4 types)</span>
+        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <div class="alert alert-success" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Success!</strong> Your profile has been updated successfully.
+          </div>
+        </div>
+
+        <div class="alert alert-error" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Error!</strong> Something went wrong. Please try again later.
+          </div>
+        </div>
+
+        <div class="alert alert-warning" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Warning!</strong> Your account storage is 90% full.
+          </div>
+        </div>
+
+        <div class="alert alert-info" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Info:</strong> A new version of the app is available.
+          </div>
+        </div>
+
+      </div>
+      <div class="code-snippet" id="code-basic">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="alert alert-success" role="alert"&gt;
+  &lt;div class="alert-icon"&gt;...svg...&lt;/div&gt;
+  &lt;div class="alert-body"&gt;
+    &lt;strong&gt;Success!&lt;/strong&gt; Your profile has been updated.
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         2. Alert with Icon (larger, title + message)
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Alert with Icon (title + message)</span>
+        <button class="show-code-btn" data-target="code-icon-alert">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <div class="alert alert-success" style="align-items:flex-start;" role="alert">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="alert-body">
+            <div class="alert-title">Payment Successful</div>
+            <div class="alert-msg">Your order #4821 has been confirmed. You will receive a confirmation email shortly.</div>
+          </div>
+        </div>
+
+        <div class="alert alert-error" style="align-items:flex-start;" role="alert">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--danger);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <div class="alert-body">
+            <div class="alert-title">Upload Failed</div>
+            <div class="alert-msg">The file exceeds the maximum allowed size of 10 MB. Please compress or split the file.</div>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="align-items:flex-start;" role="alert">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--info);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+          </div>
+          <div class="alert-body">
+            <div class="alert-title">Scheduled Maintenance</div>
+            <div class="alert-msg">The system will be down for maintenance on Sunday, March 20 from 2:00 AM to 4:00 AM UTC.</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="code-snippet" id="code-icon-alert">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="alert alert-success" role="alert"&gt;
+  &lt;div style="width:36px;height:36px;border-radius:50%;background:var(--success);
+              display:flex;align-items:center;justify-content:center;"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;div class="alert-body"&gt;
+    &lt;div class="alert-title"&gt;Payment Successful&lt;/div&gt;
+    &lt;div class="alert-msg"&gt;Your order has been confirmed.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         3. Alert with Close Button
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Alert with Close Button</span>
+        <button class="show-code-btn" data-target="code-close">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column" id="dismissible-demo">
+
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div class="alert-body"><strong>Done!</strong> Changes saved successfully.</div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert-warning alert-dismissible" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+          </div>
+          <div class="alert-body"><strong>Warning:</strong> Your session expires in 5 minutes.</div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert-error alert-dismissible" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="alert-body"><strong>Error:</strong> Failed to connect to the server.</div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+        <button class="replay-btn" id="reset-dismissible">↺ Reset alerts</button>
+      </div>
+      <div class="code-snippet" id="code-close">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="alert alert-success alert-dismissible" role="alert"&gt;
+  ...content...
+  &lt;button class="alert-close-btn" onclick="dismissAlert(this)"&gt;×&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+function dismissAlert(btn) {
+  const alert = btn.closest('.alert');
+  alert.classList.add('hiding');
+  setTimeout(() => alert.remove(), 300);
+}
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         4. Alert with Action Button
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Alert with Action Button</span>
+        <button class="show-code-btn" data-target="code-action">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <div class="alert alert-info" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+          </div>
+          <div class="alert-body">
+            A new software update is available for your device.
+            <div>
+              <button class="alert-action-btn">View Details</button>
+            </div>
+          </div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert-error" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="alert-body">
+            The last 3 files could not be deleted.
+            <div>
+              <button class="alert-action-btn" id="undo-delete-btn">Undo</button>
+            </div>
+          </div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert-success" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div class="alert-body">
+            Your data has been exported successfully.
+            <div>
+              <button class="alert-action-btn">Download File</button>
+            </div>
+          </div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+        </div>
+
+      </div>
+      <div class="code-snippet" id="code-action">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="alert alert-info" role="alert"&gt;
+  ...icon...
+  &lt;div class="alert-body"&gt;
+    A new update is available.
+    &lt;div&gt;
+      &lt;button class="alert-action-btn"&gt;View Details&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button class="alert-close-btn"&gt;×&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         5. Toast Notifications
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Toast Notifications</span>
+        <button class="show-code-btn" data-target="code-toast">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body">
+        <div class="toast-trigger-row">
+          <button class="btn-toast btn-toast-success" data-toast="success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Success Toast
+          </button>
+          <button class="btn-toast btn-toast-error" data-toast="error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Error Toast
+          </button>
+          <button class="btn-toast btn-toast-warning" data-toast="warning">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+            Warning Toast
+          </button>
+          <button class="btn-toast btn-toast-info" data-toast="info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+            Info Toast
+          </button>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-toast">
+        <button class="copy-btn">Copy</button>
+        <pre><code>function showToast(type, title, message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    &lt;div class="toast-icon"&gt;...svg...&lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+      &lt;div class="toast-title"&gt;${title}&lt;/div&gt;
+      &lt;div class="toast-msg"&gt;${message}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="toast-close"&gt;×&lt;/button&gt;
+  `;
+  container.appendChild(toast);
+  setTimeout(() => removeToast(toast), 4000);
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         6. Banner Alert
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Banner Alert</span>
+        <button class="show-code-btn" data-target="code-banner">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <div class="alert-banner alert-banner-success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Your account is verified and fully active.</span>
+          <button class="alert-banner-close" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert-banner alert-banner-warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+          <span>Your trial ends in 3 days. Upgrade to keep access.</span>
+          <button class="alert-banner-action">Upgrade Now</button>
+          <button class="alert-banner-close" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert-banner alert-banner-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+          <span>We updated our privacy policy. Review the changes.</span>
+          <button class="alert-banner-action">Read More</button>
+          <button class="alert-banner-close" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert-banner alert-banner-dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span>Scheduled maintenance on Sunday 2:00–4:00 AM UTC.</span>
+          <button class="alert-banner-close" aria-label="Dismiss">×</button>
+        </div>
+
+      </div>
+      <div class="code-snippet" id="code-banner">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="alert-banner alert-banner-warning"&gt;
+  &lt;svg ...&gt;&lt;/svg&gt;
+  &lt;span&gt;Your trial ends in 3 days.&lt;/span&gt;
+  &lt;button class="alert-banner-action"&gt;Upgrade Now&lt;/button&gt;
+  &lt;button class="alert-banner-close"&gt;×&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         7. Inline Alert
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. Inline Alert</span>
+        <button class="show-code-btn" data-target="code-inline">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <!-- Form field with inline error -->
+        <div class="demo-field">
+          <label for="demo-email">Email address</label>
+          <input type="email" id="demo-email" value="notanemail" placeholder="you@example.com" aria-describedby="email-error">
+          <span class="alert-inline alert-inline-error" id="email-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Please enter a valid email address.
+          </span>
+        </div>
+
+        <div class="demo-field">
+          <label for="demo-pass">Password</label>
+          <input type="password" id="demo-pass" value="abc" placeholder="Min. 8 characters" style="border-color:var(--warning);box-shadow:0 0 0 3px rgba(245,158,11,0.1);" aria-describedby="pass-warn">
+          <span class="alert-inline alert-inline-warning" id="pass-warn" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+            Password must be at least 8 characters.
+          </span>
+        </div>
+
+        <div class="demo-field">
+          <label for="demo-user">Username</label>
+          <input type="text" id="demo-user" value="johndoe42" placeholder="Username" style="border-color:var(--success);box-shadow:0 0 0 3px rgba(16,185,129,0.1);">
+          <span class="alert-inline alert-inline-success" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Username is available.
+          </span>
+        </div>
+
+      </div>
+      <div class="code-snippet" id="code-inline">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="demo-field"&gt;
+  &lt;label&gt;Email address&lt;/label&gt;
+  &lt;input type="email" value="notanemail"&gt;
+  &lt;span class="alert-inline alert-inline-error" role="alert"&gt;
+    ...icon... Please enter a valid email address.
+  &lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         8. Animated Alert (slides in from top)
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">8. Animated Alert</span>
+        <button class="show-code-btn" data-target="code-animated">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column" id="animated-demo">
+
+        <div class="alert alert-info alert-slide" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+          </div>
+          <div class="alert-body"><strong>Slide from top</strong> — animated with CSS keyframes.</div>
+        </div>
+
+        <div class="alert alert-success alert-slide-left" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="alert-body"><strong>Slide from left</strong> — cubic-bezier spring easing.</div>
+        </div>
+
+        <div class="alert alert-warning alert-bounce" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+          </div>
+          <div class="alert-body"><strong>Bounce in</strong> — scale from 0.85 to 1.</div>
+        </div>
+
+        <button class="replay-btn" id="replay-animated">↺ Replay animations</button>
+      </div>
+      <div class="code-snippet" id="code-animated">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* CSS keyframe — slide from top */
+.alert-slide {
+  animation: slide-from-top 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes slide-from-top {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+&lt;div class="alert alert-info alert-slide"&gt;...&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         9. Alert with Progress Bar
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">9. Alert with Progress Bar (auto-dismiss)</span>
+        <button class="show-code-btn" data-target="code-progress">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column" id="progress-demo">
+
+        <div class="alert alert-success alert-progress-wrap" id="progress-alert-1" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Upload complete!</strong> All 5 files were uploaded successfully.
+          </div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          <div class="alert-progress-bar" id="progress-bar-1" style="width:100%;"></div>
+        </div>
+
+        <div class="alert alert-info alert-progress-wrap" id="progress-alert-2" role="alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+          </div>
+          <div class="alert-body">
+            <strong>Syncing...</strong> Your data is being synchronized in the background.
+          </div>
+          <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          <div class="alert-progress-bar" id="progress-bar-2" style="width:100%;background:var(--info);"></div>
+        </div>
+
+        <button class="replay-btn" id="reset-progress">↺ Restart alerts</button>
+
+      </div>
+      <div class="code-snippet" id="code-progress">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* The progress bar shrinks from 100% → 0% over N seconds */
+function startProgressAlert(alertEl, barEl, duration = 5000) {
+  barEl.style.transition = `width ${duration}ms linear`;
+  barEl.style.width = '100%';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { barEl.style.width = '0%'; });
+  });
+  setTimeout(() => {
+    alertEl.classList.add('hiding');
+    setTimeout(() => alertEl.remove(), 300);
+  }, duration);
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         10. Stacked Alerts
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">10. Stacked Alerts</span>
+        <button class="show-code-btn" data-target="code-stacked">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+
+        <div class="stacked-alerts" id="stacked-demo">
+
+          <div class="alert alert-success alert-dismissible" role="alert">
+            <div class="alert-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="alert-body">
+              <div class="alert-title">Build Successful</div>
+              <div class="alert-msg">Deployed to production in 12s.</div>
+            </div>
+            <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          </div>
+
+          <div class="alert alert-info alert-dismissible" role="alert">
+            <div class="alert-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>
+            </div>
+            <div class="alert-body">
+              <div class="alert-title">3 warnings in build log</div>
+              <div class="alert-msg">Non-critical. You can review them in the CI panel.</div>
+            </div>
+            <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          </div>
+
+          <div class="alert alert-warning alert-dismissible" role="alert">
+            <div class="alert-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+            </div>
+            <div class="alert-body">
+              <div class="alert-title">Memory usage high</div>
+              <div class="alert-msg">The process is using 92% of available memory.</div>
+            </div>
+            <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          </div>
+
+          <div class="alert alert-error alert-dismissible" role="alert">
+            <div class="alert-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="alert-body">
+              <div class="alert-title">Database connection lost</div>
+              <div class="alert-msg">Could not reach the primary database. Failover initiated.</div>
+            </div>
+            <button class="alert-close-btn" aria-label="Dismiss">×</button>
+          </div>
+
+        </div><!-- /stacked-alerts -->
+
+        <button class="replay-btn" id="reset-stacked" style="margin-top:0.5rem;">↺ Reset stacked alerts</button>
+
+      </div>
+      <div class="code-snippet" id="code-stacked">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="stacked-alerts"&gt;
+  &lt;div class="alert alert-success alert-dismissible"&gt;...&lt;/div&gt;
+  &lt;div class="alert alert-info    alert-dismissible"&gt;...&lt;/div&gt;
+  &lt;div class="alert alert-warning alert-dismissible"&gt;...&lt;/div&gt;
+  &lt;div class="alert alert-error   alert-dismissible"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+  </main><!-- /main-content -->
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+/* ============================================================
+   Alert interactions — Vanilla JS
+   ============================================================ */
+
+/* ---- Shared dismiss helper ---- */
+function dismissAlert(alertEl) {
+  alertEl.classList.add('hiding');
+  setTimeout(() => alertEl.remove(), 320);
+}
+
+/* ---- Delegate close button clicks for .alert-close-btn ---- */
+document.addEventListener('click', (e) => {
+  if (e.target.matches('.alert-close-btn')) {
+    dismissAlert(e.target.closest('.alert'));
+  }
+  if (e.target.matches('.alert-banner-close')) {
+    const banner = e.target.closest('.alert-banner');
+    if (banner) {
+      banner.style.animation = 'alert-fade-out 0.3s ease forwards';
+      setTimeout(() => banner.remove(), 320);
+    }
+  }
+});
+
+/* ---- Reset dismissible demo ---- */
+(function() {
+  const resetBtn = document.getElementById('reset-dismissible');
+  if (!resetBtn) return;
+  const container = document.getElementById('dismissible-demo');
+  const original  = container.innerHTML;
+  resetBtn.addEventListener('click', () => {
+    container.innerHTML = original;
+  });
+})();
+
+/* ---- Toast notifications ---- */
+(function setupToasts() {
+  const toastData = {
+    success: {
+      title: 'Saved successfully',
+      msg:   'Your changes have been saved.',
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+    },
+    error: {
+      title: 'Upload failed',
+      msg:   'The file could not be uploaded. Try again.',
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+    },
+    warning: {
+      title: 'Storage almost full',
+      msg:   'You have used 90% of your quota.',
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`
+    },
+    info: {
+      title: 'New update available',
+      msg:   'Version 2.4.1 is ready to install.',
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8" stroke-linecap="round" stroke-width="3"/></svg>`
+    }
+  };
+
+  function removeToast(toast) {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 320);
+  }
+
+  function showToast(type) {
+    const container = document.getElementById('toast-container');
+    const data = toastData[type];
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+      <div class="toast-icon">${data.icon}</div>
+      <div class="toast-body">
+        <div class="toast-title">${data.title}</div>
+        <div class="toast-msg">${data.msg}</div>
+      </div>
+      <button class="toast-close" aria-label="Close">×</button>
+    `;
+    container.appendChild(toast);
+
+    /* Auto-dismiss after 4 seconds */
+    const timer = setTimeout(() => removeToast(toast), 4000);
+
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+      clearTimeout(timer);
+      removeToast(toast);
+    });
+  }
+
+  document.querySelectorAll('[data-toast]').forEach(btn => {
+    btn.addEventListener('click', () => showToast(btn.dataset.toast));
+  });
+})();
+
+/* ---- Animated alert — replay ---- */
+(function() {
+  const replayBtn = document.getElementById('replay-animated');
+  if (!replayBtn) return;
+  const container = document.getElementById('animated-demo');
+  const original  = container.innerHTML;
+
+  replayBtn.addEventListener('click', () => {
+    container.innerHTML = original;
+    /* Re-attach the replay button listener */
+    document.getElementById('replay-animated').addEventListener('click', arguments.callee);
+  });
+})();
+
+/* ---- Progress bar alerts ---- */
+(function setupProgressAlerts() {
+  function startProgress(alertId, barId, duration) {
+    const alertEl = document.getElementById(alertId);
+    const barEl   = document.getElementById(barId);
+    if (!alertEl || !barEl) return;
+
+    /* Start full width */
+    barEl.style.transition = 'none';
+    barEl.style.width = '100%';
+
+    /* Next frame: animate to 0 */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        barEl.style.transition = `width ${duration}ms linear`;
+        barEl.style.width = '0%';
+      });
+    });
+
+    /* Auto-dismiss when bar reaches 0 */
+    const timer = setTimeout(() => dismissAlert(alertEl), duration);
+
+    /* Manual close */
+    alertEl.querySelector('.alert-close-btn')?.addEventListener('click', () => {
+      clearTimeout(timer);
+    });
+  }
+
+  function initProgress() {
+    startProgress('progress-alert-1', 'progress-bar-1', 5000);
+    startProgress('progress-alert-2', 'progress-bar-2', 7000);
+  }
+
+  initProgress();
+
+  const resetBtn = document.getElementById('reset-progress');
+  if (resetBtn) {
+    const container = document.getElementById('progress-demo');
+    const original  = container.innerHTML;
+    resetBtn.addEventListener('click', () => {
+      container.innerHTML = original;
+      /* Re-cache elements */
+      document.getElementById('reset-progress').addEventListener('click', arguments.callee);
+      startProgress('progress-alert-1', 'progress-bar-1', 5000);
+      startProgress('progress-alert-2', 'progress-bar-2', 7000);
+    });
+  }
+})();
+
+/* ---- Stacked alerts — reset ---- */
+(function() {
+  const resetBtn = document.getElementById('reset-stacked');
+  if (!resetBtn) return;
+  const container = document.getElementById('stacked-demo');
+  const original  = container.innerHTML;
+  resetBtn.addEventListener('click', () => {
+    container.innerHTML = original;
+  });
+})();
+
+/* ---- Undo button demo ---- */
+(function() {
+  const undoBtn = document.getElementById('undo-delete-btn');
+  if (!undoBtn) return;
+  undoBtn.addEventListener('click', () => {
+    undoBtn.textContent = 'Restored!';
+    undoBtn.style.opacity = '0.6';
+    undoBtn.disabled = true;
+  });
+})();
+</script>
+</body>
+</html>

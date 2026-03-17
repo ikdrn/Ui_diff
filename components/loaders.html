@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loaders — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Loaders Page — Page-specific styles
+       ============================================================ */
+
+    /* ---- Loader demo containers ---- */
+    .loader-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .loader-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: box-shadow var(--transition), border-color var(--transition);
+    }
+    .loader-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+
+    .loader-card-header {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .loader-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .loader-card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      background: rgba(99,102,241,0.1);
+      color: var(--primary);
+    }
+
+    .loader-card-body {
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      min-height: 120px;
+      background: var(--surface-2);
+    }
+
+    .loader-card-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ---- Variant label under each loader ---- */
+    .loader-variant {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .loader-variant-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       KEYFRAMES
+       ============================================================ */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spin-reverse {
+      to { transform: rotate(-360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    @keyframes bounce-ball {
+      0%   { transform: translateY(0) scaleY(1); animation-timing-function: ease-in; }
+      40%  { transform: translateY(-28px) scaleY(1); animation-timing-function: ease-out; }
+      50%  { transform: translateY(-28px) scaleY(1); }
+      60%  { transform: translateY(0) scaleY(0.75); animation-timing-function: ease-in; }
+      75%  { transform: translateY(-14px) scaleY(1); animation-timing-function: ease-out; }
+      90%  { transform: translateY(0) scaleY(0.9); }
+      100% { transform: translateY(0) scaleY(1); }
+    }
+    @keyframes pulse-scale {
+      0%, 100% { transform: scale(1);   opacity: 1; }
+      50%       { transform: scale(1.5); opacity: 0.4; }
+    }
+    @keyframes shimmer {
+      from { background-position: -200% 0; }
+      to   { background-position:  200% 0; }
+    }
+    @keyframes progress-fill {
+      0%   { width: 0%; }
+      80%  { width: 100%; }
+      100% { width: 100%; }
+    }
+    @keyframes flip-3d {
+      0%   { transform: perspective(120px) rotateX(0deg)   rotateY(0deg); }
+      50%  { transform: perspective(120px) rotateX(-180deg) rotateY(0deg); }
+      100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
+    }
+    @keyframes morph {
+      0%   { border-radius: 50%; transform: rotate(0deg); background: var(--primary); }
+      25%  { border-radius: 0%;  transform: rotate(90deg); background: var(--secondary); }
+      50%  { border-radius: 50% 0 50% 0; transform: rotate(180deg); background: var(--success); }
+      75%  { border-radius: 0%;  transform: rotate(270deg); background: var(--warning); }
+      100% { border-radius: 50%; transform: rotate(360deg); background: var(--primary); }
+    }
+    @keyframes square-rotate {
+      0%   { transform: rotate(0deg);   background: var(--primary); }
+      25%  { transform: rotate(90deg);  background: var(--secondary); }
+      50%  { transform: rotate(180deg); background: var(--success); }
+      75%  { transform: rotate(270deg); background: var(--warning); }
+      100% { transform: rotate(360deg); background: var(--primary); }
+    }
+    @keyframes clock-hand {
+      from { transform: translateX(-50%) rotate(0deg); }
+      to   { transform: translateX(-50%) rotate(360deg); }
+    }
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(20px) rotate(0deg); }
+      to   { transform: rotate(360deg) translateX(20px) rotate(-360deg); }
+    }
+    @keyframes text-dots {
+      0%   { content: '.'; }
+      33%  { content: '..'; }
+      66%  { content: '...'; }
+      100% { content: '.'; }
+    }
+    @keyframes dna-a {
+      0%   { transform: translateY(0px)   scale(1); opacity: 1; }
+      50%  { transform: translateY(18px)  scale(0.5); opacity: 0.4; }
+      100% { transform: translateY(0px)   scale(1); opacity: 1; }
+    }
+    @keyframes dna-b {
+      0%   { transform: translateY(18px)  scale(0.5); opacity: 0.4; }
+      50%  { transform: translateY(0px)   scale(1); opacity: 1; }
+      100% { transform: translateY(18px)  scale(0.5); opacity: 0.4; }
+    }
+    @keyframes gradient-spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes ring-outer {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes ring-inner {
+      to { transform: rotate(-360deg); }
+    }
+
+    /* ============================================================
+       1. SPINNER
+       ============================================================ */
+    .spinner {
+      border-radius: 50%;
+      border-style: solid;
+      border-color: var(--gray-200);
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .spinner-sm  { width: 24px; height: 24px; border-width: 3px; border-top-color: var(--primary); }
+    .spinner-md  { width: 40px; height: 40px; border-width: 4px; border-top-color: var(--primary); }
+    .spinner-lg  { width: 56px; height: 56px; border-width: 5px; border-top-color: var(--primary); }
+    .spinner-success { border-top-color: var(--success); }
+    .spinner-warning { border-top-color: var(--warning); }
+    .spinner-danger  { border-top-color: var(--danger);  }
+
+    /* ============================================================
+       2. DOTS LOADER
+       ============================================================ */
+    .dots-loader {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: bounce 1s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.15s; background: var(--secondary); }
+    .dot:nth-child(3) { animation-delay: 0.30s; background: var(--info); }
+
+    .dots-loader.dots-lg .dot { width: 14px; height: 14px; }
+    .dots-loader.dots-success .dot { background: var(--success); }
+    .dots-loader.dots-danger  .dot { background: var(--danger);  }
+
+    /* ============================================================
+       3. BAR / PROGRESS LOADER
+       ============================================================ */
+    .bar-loader-wrap {
+      width: 180px;
+    }
+    .bar-loader-track {
+      width: 100%;
+      height: 6px;
+      background: var(--gray-200);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .bar-loader-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      animation: progress-fill 2s ease-in-out infinite;
+    }
+    .bar-loader-track.thick { height: 10px; }
+    .bar-loader-track.success .bar-loader-fill { background: linear-gradient(90deg, var(--success), #34d399); }
+    .bar-loader-track.warning .bar-loader-fill { background: linear-gradient(90deg, var(--warning), #fcd34d); }
+
+    /* ============================================================
+       4. PULSE LOADER
+       ============================================================ */
+    .pulse-loader {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: pulse-scale 1.2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .pulse-loader.pulse-sm  { width: 24px; height: 24px; }
+    .pulse-loader.pulse-lg  { width: 56px; height: 56px; }
+    .pulse-loader.pulse-secondary { background: var(--secondary); }
+    .pulse-loader.pulse-success   { background: var(--success);   }
+    .pulse-loader.pulse-danger    { background: var(--danger);    }
+
+    /* ============================================================
+       5. RING LOADER (double counter-rotating)
+       ============================================================ */
+    .ring-loader {
+      position: relative;
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+    }
+    .ring-outer {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      border-top-color: var(--primary);
+      border-bottom-color: var(--primary);
+      animation: ring-outer 1.2s linear infinite;
+    }
+    .ring-inner {
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      border-left-color: var(--secondary);
+      border-right-color: var(--secondary);
+      animation: ring-inner 0.9s linear infinite;
+    }
+    .ring-loader.ring-lg {
+      width: 64px; height: 64px;
+    }
+
+    /* ============================================================
+       6. SKELETON LOADER
+       ============================================================ */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--gray-200) 25%,
+        var(--gray-100) 50%,
+        var(--gray-200) 75%
+      );
+      background-size: 200%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Card skeleton */
+    .skeleton-card {
+      width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .skeleton-card-img {
+      width: 100%;
+      height: 120px;
+      border-radius: 0;
+    }
+    .skeleton-card-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .skeleton-line { height: 12px; }
+    .skeleton-line.w-full  { width: 100%; }
+    .skeleton-line.w-3-4   { width: 75%; }
+    .skeleton-line.w-1-2   { width: 50%; }
+    .skeleton-line.w-1-4   { width: 25%; }
+    .skeleton-line.h-lg    { height: 16px; }
+
+    /* Text skeleton */
+    .skeleton-text-block {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .skeleton-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* ============================================================
+       7. BOUNCE BALL LOADER
+       ============================================================ */
+    .bounce-ball {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: bounce-ball 1s ease infinite;
+      flex-shrink: 0;
+    }
+    .bounce-ball.ball-secondary { background: var(--secondary); animation-delay: 0.15s; }
+    .bounce-ball.ball-success   { background: var(--success);   animation-delay: 0.30s; }
+
+    /* ============================================================
+       8. FLIP LOADER
+       ============================================================ */
+    .flip-loader {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
+      animation: flip-3d 1.2s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+    .flip-loader.flip-secondary { background: var(--secondary); animation-delay: 0.2s; }
+    .flip-loader.flip-success   { background: var(--success);   animation-delay: 0.4s; }
+    .flip-loader.flip-lg { width: 48px; height: 48px; }
+
+    /* ============================================================
+       9. GRADIENT SPINNER
+       ============================================================ */
+    .gradient-spinner-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .gradient-spinner {
+      border-radius: 50%;
+      animation: gradient-spin 1s linear infinite;
+    }
+    .gradient-spinner-md {
+      width: 44px; height: 44px;
+      background: conic-gradient(var(--primary) 0%, var(--secondary) 50%, transparent 100%);
+    }
+    .gradient-spinner-lg {
+      width: 60px; height: 60px;
+      background: conic-gradient(var(--primary) 0%, var(--info) 40%, var(--secondary) 80%, transparent 100%);
+    }
+    /* Mask center hole */
+    .gradient-spinner::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--surface-2);
+    }
+    .gradient-spinner-wrap { position: relative; }
+    .gradient-spinner-wrap .gradient-spinner { display: block; }
+
+    /* ============================================================
+       10. TEXT LOADER
+       ============================================================ */
+    .text-loader {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+    }
+    .text-loader .text-dots::after {
+      content: '.';
+      display: inline-block;
+      animation: text-dots 1.2s steps(1, end) infinite;
+    }
+    .text-loader.text-secondary { color: var(--secondary); }
+    .text-loader.text-success   { color: var(--success);   }
+
+    /* ============================================================
+       11. CLOCK LOADER
+       ============================================================ */
+    .clock-loader {
+      position: relative;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 3px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+    .clock-face {
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+    }
+    /* Hour hand */
+    .clock-hand-hour {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: 50% 100%;
+      width: 2px; height: 30%;
+      background: var(--primary);
+      border-radius: 2px;
+      transform: translateX(-50%) rotate(0deg);
+      animation: clock-hand 6s linear infinite;
+    }
+    /* Minute hand */
+    .clock-hand-minute {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: 50% 100%;
+      width: 2px; height: 42%;
+      background: var(--secondary);
+      border-radius: 2px;
+      transform: translateX(-50%) rotate(0deg);
+      animation: clock-hand 1s linear infinite;
+    }
+    /* Center dot */
+    .clock-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .clock-loader.clock-lg {
+      width: 64px; height: 64px;
+    }
+
+    /* ============================================================
+       12. SQUARE ROTATE LOADER
+       ============================================================ */
+    .square-rotate {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      animation: square-rotate 1.6s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .square-rotate.sq-sm { width: 24px; height: 24px; }
+    .square-rotate.sq-lg { width: 48px; height: 48px; border-radius: var(--radius-md); }
+
+    /* ============================================================
+       13. DNA HELIX LOADER
+       ============================================================ */
+    .dna-loader {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .dna-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .dna-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    /* Top row — primary color, animates down */
+    .dna-dot.dna-top {
+      background: var(--primary);
+      animation: dna-a 1s ease-in-out infinite;
+    }
+    /* Bottom row — secondary, counter-phase */
+    .dna-dot.dna-bot {
+      background: var(--secondary);
+      animation: dna-b 1s ease-in-out infinite;
+    }
+    /* Stagger each column */
+    .dna-col:nth-child(1) .dna-top { animation-delay: 0.0s; }
+    .dna-col:nth-child(2) .dna-top { animation-delay: 0.1s; }
+    .dna-col:nth-child(3) .dna-top { animation-delay: 0.2s; }
+    .dna-col:nth-child(4) .dna-top { animation-delay: 0.3s; }
+    .dna-col:nth-child(5) .dna-top { animation-delay: 0.4s; }
+    .dna-col:nth-child(6) .dna-top { animation-delay: 0.5s; }
+    .dna-col:nth-child(7) .dna-top { animation-delay: 0.6s; }
+    .dna-col:nth-child(1) .dna-bot { animation-delay: 0.5s; }
+    .dna-col:nth-child(2) .dna-bot { animation-delay: 0.6s; }
+    .dna-col:nth-child(3) .dna-bot { animation-delay: 0.7s; }
+    .dna-col:nth-child(4) .dna-bot { animation-delay: 0.8s; }
+    .dna-col:nth-child(5) .dna-bot { animation-delay: 0.9s; }
+    .dna-col:nth-child(6) .dna-bot { animation-delay: 1.0s; }
+    .dna-col:nth-child(7) .dna-bot { animation-delay: 1.1s; }
+
+    /* ============================================================
+       14. ORBIT LOADER
+       ============================================================ */
+    .orbit-loader {
+      position: relative;
+      width: 50px; height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .orbit-center {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .orbit-satellite {
+      position: absolute;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--secondary);
+      top: 50%; left: 50%;
+      margin-top: -5px; margin-left: -5px;
+      animation: orbit 1.2s linear infinite;
+    }
+    .orbit-satellite-2 {
+      position: absolute;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--info);
+      top: 50%; left: 50%;
+      margin-top: -3.5px; margin-left: -3.5px;
+      animation: orbit 1.8s linear infinite reverse;
+    }
+    @keyframes orbit-2 {
+      from { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+      to   { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+    }
+    .orbit-loader.orbit-lg {
+      width: 70px; height: 70px;
+    }
+    .orbit-loader.orbit-lg .orbit-center { width: 16px; height: 16px; }
+    .orbit-loader.orbit-lg .orbit-satellite {
+      width: 13px; height: 13px;
+      margin-top: -6.5px; margin-left: -6.5px;
+      animation: orbit-2 1.2s linear infinite;
+    }
+    .orbit-loader.orbit-lg .orbit-satellite-2 {
+      animation: orbit-2 2s linear infinite reverse;
+    }
+
+    /* ============================================================
+       15. MORPHING LOADER
+       ============================================================ */
+    .morph-loader {
+      width: 44px; height: 44px;
+      animation: morph 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .morph-loader.morph-sm { width: 28px; height: 28px; }
+    .morph-loader.morph-lg { width: 60px; height: 60px; }
+
+    /* ============================================================
+       Skeleton demo — themed adjustments
+       ============================================================ */
+    [data-theme="dark"] .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--gray-700) 25%,
+        var(--gray-600) 50%,
+        var(--gray-700) 75%
+      );
+      background-size: 200%;
+      animation: shimmer 1.5s infinite;
+    }
+    [data-theme="dark"] .gradient-spinner::after {
+      background: var(--surface-2);
+    }
+
+    /* ============================================================
+       Section header
+       ============================================================ */
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       Pause controls
+       ============================================================ */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all var(--transition);
+    }
+    .ctrl-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .ctrl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* Pause all animations via class on body */
+    body.paused * {
+      animation-play-state: paused !important;
+    }
+
+    /* ============================================================
+       Responsive
+       ============================================================ */
+    @media (max-width: 600px) {
+      .loader-demo-grid { grid-template-columns: 1fr; }
+      .loader-card-body { padding: 2rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <!-- Mobile hamburger -->
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <a href="../index.html" class="header-logo">
+      <div class="header-logo-icon">✦</div>
+      <span>Frontend Design Catalog</span>
+    </a>
+  </div>
+
+  <div class="header-right">
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     Layout: Sidebar + Main
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- ---- Left Sidebar ---- -->
+  <nav class="sidebar" id="sidebar" aria-label="Component navigation">
+    <div class="sidebar-section-title">Navigation</div>
+    <a href="../index.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+
+    <div class="sidebar-section-title" style="margin-top:0.75rem;">Components</div>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="20" x2="21" y2="20"/><line x1="3" y1="16" x2="21" y2="16"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="8" height="14" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="8" rx="1"/><rect x="18" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/><rect x="3" y="3" width="18" height="6" rx="1"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="22" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Avatars
+    </a>
+  </nav>
+
+  <!-- ---- Main Content ---- -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Loaders</span>
+    </nav>
+
+    <!-- Page header -->
+    <div class="page-header">
+      <h1 class="page-title">Loaders</h1>
+      <p class="page-subtitle">15+ pure CSS loading animation variants — no JavaScript required for the animations.</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <button class="ctrl-btn" id="pause-btn" onclick="togglePause(this)">⏸ Pause All</button>
+      <button class="ctrl-btn" onclick="resumeAll()">▶ Resume All</button>
+      <span style="font-size:0.8rem;color:var(--text-muted);">All animations are pure CSS — zero JS dependency.</span>
+    </div>
+
+    <!-- ===========================================================
+         1. SPINNER
+         =========================================================== -->
+    <div class="section-label">1 — Classic Spinner</div>
+    <div class="loader-demo-grid">
+      <!-- Sizes -->
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Spinner — Sizes</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="spinner spinner-sm"></div>
+            <span class="loader-variant-label">24px</span>
+          </div>
+          <div class="loader-variant">
+            <div class="spinner spinner-md"></div>
+            <span class="loader-variant-label">40px</span>
+          </div>
+          <div class="loader-variant">
+            <div class="spinner spinner-lg"></div>
+            <span class="loader-variant-label">56px</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">border-top-color: var(--primary)</div>
+      </div>
+
+      <!-- Colors -->
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Spinner — Colors</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="spinner spinner-md"></div>
+            <span class="loader-variant-label">Primary</span>
+          </div>
+          <div class="loader-variant">
+            <div class="spinner spinner-md spinner-success"></div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+          <div class="loader-variant">
+            <div class="spinner spinner-md spinner-warning"></div>
+            <span class="loader-variant-label">Warning</span>
+          </div>
+          <div class="loader-variant">
+            <div class="spinner spinner-md spinner-danger"></div>
+            <span class="loader-variant-label">Danger</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">animation: spin 0.8s linear infinite</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         2. DOTS LOADER
+         =========================================================== -->
+    <div class="section-label">2 — Bouncing Dots</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Dots Loader — Default</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="dots-loader">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+            <span class="loader-variant-label">Normal</span>
+          </div>
+          <div class="loader-variant">
+            <div class="dots-loader dots-lg">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">animation-delay staggered 0.15s each</div>
+      </div>
+
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Dots Loader — Colors</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="dots-loader dots-success">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+          <div class="loader-variant">
+            <div class="dots-loader dots-danger">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+            <span class="loader-variant-label">Danger</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes bounce — translateY(-12px)</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         3. PROGRESS BAR LOADER
+         =========================================================== -->
+    <div class="section-label">3 — Progress Bar</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Bar Loader — Variants</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body" style="flex-direction:column;align-items:flex-start;gap:1.25rem;padding-left:2rem;padding-right:2rem;">
+          <div style="width:100%;">
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;">Primary</div>
+            <div class="bar-loader-wrap" style="width:100%;">
+              <div class="bar-loader-track"><div class="bar-loader-fill"></div></div>
+            </div>
+          </div>
+          <div style="width:100%;">
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;">Success — Thick</div>
+            <div class="bar-loader-wrap" style="width:100%;">
+              <div class="bar-loader-track thick success"><div class="bar-loader-fill"></div></div>
+            </div>
+          </div>
+          <div style="width:100%;">
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;">Warning — Thick</div>
+            <div class="bar-loader-wrap" style="width:100%;">
+              <div class="bar-loader-track thick warning"><div class="bar-loader-fill"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="loader-card-footer">animation: progress-fill 2s ease-in-out infinite</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         4. PULSE LOADER
+         =========================================================== -->
+    <div class="section-label">4 — Pulse</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Pulse — Sizes &amp; Colors</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="pulse-loader pulse-sm"></div>
+            <span class="loader-variant-label">Small</span>
+          </div>
+          <div class="loader-variant">
+            <div class="pulse-loader"></div>
+            <span class="loader-variant-label">Medium</span>
+          </div>
+          <div class="loader-variant">
+            <div class="pulse-loader pulse-lg"></div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+          <div class="loader-variant">
+            <div class="pulse-loader pulse-secondary"></div>
+            <span class="loader-variant-label">Secondary</span>
+          </div>
+          <div class="loader-variant">
+            <div class="pulse-loader pulse-success"></div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+          <div class="loader-variant">
+            <div class="pulse-loader pulse-danger"></div>
+            <span class="loader-variant-label">Danger</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes pulse-scale — scale(1) → scale(1.5)</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         5. RING LOADER
+         =========================================================== -->
+    <div class="section-label">5 — Double Ring</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Ring Loader — Counter-Rotating</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="ring-loader">
+              <div class="ring-outer"></div>
+              <div class="ring-inner"></div>
+            </div>
+            <span class="loader-variant-label">Default</span>
+          </div>
+          <div class="loader-variant">
+            <div class="ring-loader ring-lg">
+              <div class="ring-outer"></div>
+              <div class="ring-inner"></div>
+            </div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">Outer: 1.2s · Inner: 0.9s (reverse)</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         6. SKELETON LOADER
+         =========================================================== -->
+    <div class="section-label">6 — Skeleton / Shimmer</div>
+    <div class="loader-demo-grid">
+      <!-- Card skeleton -->
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Card Skeleton</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body" style="justify-content:center;">
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-card-img"></div>
+            <div class="skeleton-card-body">
+              <div class="skeleton skeleton-line h-lg w-3-4"></div>
+              <div class="skeleton skeleton-line w-full"></div>
+              <div class="skeleton skeleton-line w-full"></div>
+              <div class="skeleton skeleton-line w-1-2"></div>
+            </div>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes shimmer — background-position sweep</div>
+      </div>
+
+      <!-- Text skeleton -->
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Text / List Skeleton</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body" style="flex-direction:column;align-items:flex-start;gap:1rem;padding:2rem;">
+          <div class="skeleton-row">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="skeleton-text-block">
+              <div class="skeleton skeleton-line h-lg w-3-4"></div>
+              <div class="skeleton skeleton-line w-1-2"></div>
+            </div>
+          </div>
+          <div class="skeleton-text-block" style="width:100%;">
+            <div class="skeleton skeleton-line w-full"></div>
+            <div class="skeleton skeleton-line w-full"></div>
+            <div class="skeleton skeleton-line w-3-4"></div>
+            <div class="skeleton skeleton-line w-1-4"></div>
+          </div>
+        </div>
+        <div class="loader-card-footer">background-size: 200% — linear-gradient sweep</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         7. BOUNCE BALL
+         =========================================================== -->
+    <div class="section-label">7 — Bounce Ball</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Bounce Ball — with Squish</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body" style="align-items:flex-end;padding-bottom:3rem;">
+          <div class="loader-variant" style="align-items:center;">
+            <div class="bounce-ball"></div>
+            <span class="loader-variant-label">Primary</span>
+          </div>
+          <div class="loader-variant" style="align-items:center;">
+            <div class="bounce-ball ball-secondary"></div>
+            <span class="loader-variant-label">Secondary</span>
+          </div>
+          <div class="loader-variant" style="align-items:center;">
+            <div class="bounce-ball ball-success"></div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes bounce-ball — translateY + scaleY squish</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         8. FLIP LOADER
+         =========================================================== -->
+    <div class="section-label">8 — 3D Flip</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Flip — 3D Perspective</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="flip-loader"></div>
+            <span class="loader-variant-label">Primary</span>
+          </div>
+          <div class="loader-variant">
+            <div class="flip-loader flip-secondary"></div>
+            <span class="loader-variant-label">Secondary</span>
+          </div>
+          <div class="loader-variant">
+            <div class="flip-loader flip-success"></div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+          <div class="loader-variant">
+            <div class="flip-loader flip-lg"></div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes flip-3d — rotateX + rotateY dual axis</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         9. GRADIENT SPINNER
+         =========================================================== -->
+    <div class="section-label">9 — Gradient Spinner</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Conic-Gradient Spinner</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="gradient-spinner-wrap" style="width:44px;height:44px;position:relative;flex-shrink:0;">
+              <div class="gradient-spinner gradient-spinner-md" style="position:relative;"></div>
+              <div style="position:absolute;inset:4px;border-radius:50%;background:var(--surface-2);"></div>
+            </div>
+            <span class="loader-variant-label">Medium</span>
+          </div>
+          <div class="loader-variant">
+            <div class="gradient-spinner-wrap" style="width:60px;height:60px;position:relative;flex-shrink:0;">
+              <div class="gradient-spinner gradient-spinner-lg" style="position:relative;"></div>
+              <div style="position:absolute;inset:5px;border-radius:50%;background:var(--surface-2);"></div>
+            </div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+          <div class="loader-variant">
+            <!-- Multi-color variant -->
+            <div style="position:relative;width:50px;height:50px;flex-shrink:0;">
+              <div style="width:50px;height:50px;border-radius:50%;background:conic-gradient(var(--danger),var(--warning),var(--success),var(--info),var(--primary),var(--danger));animation:gradient-spin 1.2s linear infinite;"></div>
+              <div style="position:absolute;inset:5px;border-radius:50%;background:var(--surface-2);"></div>
+            </div>
+            <span class="loader-variant-label">Rainbow</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">conic-gradient + mask center hole</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         10. TEXT LOADER
+         =========================================================== -->
+    <div class="section-label">10 — Text Loader</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Animated Text Dots</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body" style="flex-direction:column;gap:1.25rem;">
+          <div class="text-loader">Loading<span class="text-dots"></span></div>
+          <div class="text-loader text-secondary">Fetching data<span class="text-dots"></span></div>
+          <div class="text-loader text-success">Upload complete<span class="text-dots"></span></div>
+          <div class="text-loader" style="font-size:1.2rem;color:var(--info);">Please wait<span class="text-dots"></span></div>
+        </div>
+        <div class="loader-card-footer">@keyframes text-dots — content: '.' | '..' | '...'</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         11. CLOCK LOADER
+         =========================================================== -->
+    <div class="section-label">11 — Clock</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Clock Loader</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="clock-loader">
+              <div class="clock-face">
+                <div class="clock-hand-hour"></div>
+                <div class="clock-hand-minute"></div>
+                <div class="clock-center"></div>
+              </div>
+            </div>
+            <span class="loader-variant-label">Default</span>
+          </div>
+          <div class="loader-variant">
+            <div class="clock-loader clock-lg">
+              <div class="clock-face">
+                <div class="clock-hand-hour"></div>
+                <div class="clock-hand-minute"></div>
+                <div class="clock-center"></div>
+              </div>
+            </div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+          <div class="loader-variant">
+            <!-- Custom color variant -->
+            <div class="clock-loader" style="border-color:var(--success);">
+              <div class="clock-face">
+                <div class="clock-hand-hour" style="background:var(--success);"></div>
+                <div class="clock-hand-minute" style="background:var(--warning);"></div>
+                <div class="clock-center" style="background:var(--success);"></div>
+              </div>
+            </div>
+            <span class="loader-variant-label">Success</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">Minute: 1s · Hour: 6s — transform-origin: bottom center</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         12. SQUARE ROTATE
+         =========================================================== -->
+    <div class="section-label">12 — Square Rotate</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Square Rotate — Color Shift</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="square-rotate sq-sm"></div>
+            <span class="loader-variant-label">Small</span>
+          </div>
+          <div class="loader-variant">
+            <div class="square-rotate"></div>
+            <span class="loader-variant-label">Medium</span>
+          </div>
+          <div class="loader-variant">
+            <div class="square-rotate sq-lg"></div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes square-rotate — rotate + background color shift</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         13. DNA HELIX
+         =========================================================== -->
+    <div class="section-label">13 — DNA Helix</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">DNA Helix Loader</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="dna-loader">
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top"></div><div class="dna-dot dna-bot"></div></div>
+            </div>
+            <span class="loader-variant-label">7-strand helix</span>
+          </div>
+          <!-- Larger variant with custom colors -->
+          <div class="loader-variant">
+            <div class="dna-loader" style="gap:7px;">
+              <div class="dna-col"><div class="dna-dot dna-top" style="width:11px;height:11px;background:var(--danger);"></div><div class="dna-dot dna-bot" style="width:11px;height:11px;background:var(--warning);"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top" style="width:11px;height:11px;background:var(--danger);"></div><div class="dna-dot dna-bot" style="width:11px;height:11px;background:var(--warning);"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top" style="width:11px;height:11px;background:var(--danger);"></div><div class="dna-dot dna-bot" style="width:11px;height:11px;background:var(--warning);"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top" style="width:11px;height:11px;background:var(--danger);"></div><div class="dna-dot dna-bot" style="width:11px;height:11px;background:var(--warning);"></div></div>
+              <div class="dna-col"><div class="dna-dot dna-top" style="width:11px;height:11px;background:var(--danger);"></div><div class="dna-dot dna-bot" style="width:11px;height:11px;background:var(--warning);"></div></div>
+            </div>
+            <span class="loader-variant-label">Large · Custom</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">Two rows counter-phased · stagger: 0.1s per column</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         14. ORBIT LOADER
+         =========================================================== -->
+    <div class="section-label">14 — Orbit</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Orbit Loader</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="orbit-loader">
+              <div class="orbit-center"></div>
+              <div class="orbit-satellite"></div>
+            </div>
+            <span class="loader-variant-label">Single orbit</span>
+          </div>
+          <div class="loader-variant">
+            <div class="orbit-loader">
+              <div class="orbit-center"></div>
+              <div class="orbit-satellite"></div>
+              <div class="orbit-satellite-2" style="animation:orbit 2s linear infinite reverse;"></div>
+            </div>
+            <span class="loader-variant-label">Dual orbit</span>
+          </div>
+          <div class="loader-variant">
+            <div class="orbit-loader orbit-lg">
+              <div class="orbit-center"></div>
+              <div class="orbit-satellite"></div>
+              <div class="orbit-satellite-2" style="animation:orbit-2 2s linear infinite reverse;"></div>
+            </div>
+            <span class="loader-variant-label">Large dual</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">rotate → translateX → counter-rotate trick</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         15. MORPHING LOADER
+         =========================================================== -->
+    <div class="section-label">15 — Morphing Shape</div>
+    <div class="loader-demo-grid">
+      <div class="loader-card">
+        <div class="loader-card-header">
+          <span class="loader-card-title">Morphing — Circle ↔ Square ↔ Blob</span>
+          <span class="loader-card-tag">CSS</span>
+        </div>
+        <div class="loader-card-body">
+          <div class="loader-variant">
+            <div class="morph-loader morph-sm"></div>
+            <span class="loader-variant-label">Small</span>
+          </div>
+          <div class="loader-variant">
+            <div class="morph-loader"></div>
+            <span class="loader-variant-label">Medium</span>
+          </div>
+          <div class="loader-variant">
+            <div class="morph-loader morph-lg"></div>
+            <span class="loader-variant-label">Large</span>
+          </div>
+        </div>
+        <div class="loader-card-footer">@keyframes morph — border-radius + rotate + background-color</div>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         BONUS: COMBINED / FULL-PAGE OVERLAY DEMO
+         =========================================================== -->
+    <div class="section-label">Bonus — Full-Page Overlay Demo</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:2.5rem;">
+      <div class="loader-card-header" style="padding:1rem 1.5rem;">
+        <span class="loader-card-title">Full-Page Loading Overlay</span>
+        <span class="loader-card-tag">JS trigger</span>
+      </div>
+      <div style="padding:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <button class="ctrl-btn" onclick="showOverlay('spinner')">Spinner Overlay</button>
+        <button class="ctrl-btn" onclick="showOverlay('dots')">Dots Overlay</button>
+        <button class="ctrl-btn" onclick="showOverlay('pulse')">Pulse Overlay</button>
+        <button class="ctrl-btn" onclick="showOverlay('skeleton')">Skeleton Screen</button>
+      </div>
+    </div>
+
+    <!-- Full-page overlay element -->
+    <div id="page-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.75);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:1rem;backdrop-filter:blur(4px);">
+      <div id="overlay-loader"></div>
+      <p style="color:#f1f5f9;font-size:0.95rem;font-weight:500;" id="overlay-label">Loading…</p>
+      <button onclick="hideOverlay()" style="margin-top:0.5rem;padding:0.4rem 1rem;border-radius:var(--radius);background:rgba(255,255,255,0.15);color:#f1f5f9;border:1px solid rgba(255,255,255,0.2);cursor:pointer;font-size:0.8rem;">Dismiss</button>
+    </div>
+
+    <!-- Skeleton screen (page-level) -->
+    <div id="skeleton-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9998;padding:5rem 2rem 2rem;overflow:auto;">
+      <div style="max-width:900px;margin:0 auto;">
+        <div class="skeleton skeleton-line h-lg" style="width:200px;margin-bottom:2rem;"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem;">
+          <div class="skeleton-card" style="border:1px solid var(--border);">
+            <div class="skeleton skeleton-card-img"></div>
+            <div class="skeleton-card-body">
+              <div class="skeleton skeleton-line h-lg w-3-4"></div>
+              <div class="skeleton skeleton-line w-full"></div>
+              <div class="skeleton skeleton-line w-1-2"></div>
+            </div>
+          </div>
+          <div class="skeleton-card" style="border:1px solid var(--border);">
+            <div class="skeleton skeleton-card-img"></div>
+            <div class="skeleton-card-body">
+              <div class="skeleton skeleton-line h-lg w-3-4"></div>
+              <div class="skeleton skeleton-line w-full"></div>
+              <div class="skeleton skeleton-line w-1-2"></div>
+            </div>
+          </div>
+          <div class="skeleton-card" style="border:1px solid var(--border);">
+            <div class="skeleton skeleton-card-img"></div>
+            <div class="skeleton-card-body">
+              <div class="skeleton skeleton-line h-lg w-3-4"></div>
+              <div class="skeleton skeleton-line w-full"></div>
+              <div class="skeleton skeleton-line w-1-2"></div>
+            </div>
+          </div>
+        </div>
+        <button onclick="hideOverlay()" style="padding:0.5rem 1.25rem;border-radius:var(--radius);background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:0.875rem;font-weight:600;">Dismiss Skeleton Screen</button>
+      </div>
+    </div>
+
+  </main><!-- /main-content -->
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ---- Pause / Resume all CSS animations ---- */
+  function togglePause(btn) {
+    const paused = document.body.classList.toggle('paused');
+    btn.textContent = paused ? '▶ Resume All' : '⏸ Pause All';
+    btn.classList.toggle('active', paused);
+  }
+
+  function resumeAll() {
+    document.body.classList.remove('paused');
+    const pauseBtn = document.getElementById('pause-btn');
+    if (pauseBtn) { pauseBtn.textContent = '⏸ Pause All'; pauseBtn.classList.remove('active'); }
+  }
+
+  /* ---- Full-page overlay demo ---- */
+  function showOverlay(type) {
+    const overlay = document.getElementById('page-overlay');
+    const loaderEl = document.getElementById('overlay-loader');
+    const labelEl  = document.getElementById('overlay-label');
+    const skelEl   = document.getElementById('skeleton-screen');
+
+    // Reset
+    skelEl.style.display = 'none';
+    overlay.style.display = 'none';
+
+    if (type === 'skeleton') {
+      skelEl.style.display = 'block';
+      return;
+    }
+
+    // Build loader HTML
+    const templates = {
+      spinner: { html: '<div style="width:56px;height:56px;border:5px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>', label: 'Spinner Overlay' },
+      dots:    { html: '<div style="display:flex;gap:8px;align-items:flex-end;"><div style="width:14px;height:14px;border-radius:50%;background:#fff;animation:bounce 1s ease-in-out infinite;"></div><div style="width:14px;height:14px;border-radius:50%;background:#a5b4fc;animation:bounce 1s ease-in-out 0.15s infinite;"></div><div style="width:14px;height:14px;border-radius:50%;background:#c4b5fd;animation:bounce 1s ease-in-out 0.3s infinite;"></div></div>', label: 'Dots Overlay' },
+      pulse:   { html: '<div style="width:60px;height:60px;border-radius:50%;background:#6366f1;animation:pulse-scale 1.2s ease-in-out infinite;"></div>', label: 'Pulse Overlay' },
+    };
+
+    const tpl = templates[type];
+    if (!tpl) return;
+    loaderEl.innerHTML = tpl.html;
+    labelEl.textContent = tpl.label;
+    overlay.style.display = 'flex';
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(hideOverlay, 3000);
+  }
+
+  function hideOverlay() {
+    document.getElementById('page-overlay').style.display = 'none';
+    document.getElementById('skeleton-screen').style.display = 'none';
+  }
+</script>
+</body>
+</html>

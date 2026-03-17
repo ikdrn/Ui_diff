@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heroes — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Heroes page — scoped styles
+       ============================================================ */
+
+    /* ---- Hero demo container ---- */
+    .hero-demo-wrap {
+      min-height: 400px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    /* ============================================================
+       1. Centered Text Hero
+       ============================================================ */
+    .hero-centered {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+      padding: 3rem 2rem;
+    }
+    .hero-centered__inner { max-width: 640px; }
+    .hero-centered__eyebrow {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .hero-centered__title {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .hero-centered__sub {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .hero-centered__btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hbtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.75rem 1.75rem;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+    }
+    .hbtn:hover { transform: translateY(-2px); }
+    .hbtn--white {
+      background: #fff;
+      color: #6366f1;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .hbtn--white:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+    .hbtn--outline {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.7);
+    }
+    .hbtn--outline:hover { background: rgba(255,255,255,0.1); }
+
+    /* ============================================================
+       2. Split Hero
+       ============================================================ */
+    .hero-split {
+      min-height: 400px;
+      display: flex;
+    }
+    .hero-split__left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 3rem 2.5rem;
+      background: var(--surface);
+    }
+    .hero-split__right {
+      flex: 1;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-split__content { max-width: 360px; }
+    .hero-split__tag {
+      display: inline-block;
+      background: rgba(99,102,241,0.12);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-split__title {
+      font-size: clamp(1.6rem, 3vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .hero-split__text {
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 1.75rem;
+    }
+    .hero-split__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero-split__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.4); color: #fff; }
+    /* Geometric art on right */
+    .geo-art {
+      position: relative;
+      width: 260px;
+      height: 260px;
+    }
+    .geo-art__circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .geo-art__circle--1 {
+      width: 200px; height: 200px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      top: 30px; left: 30px;
+      opacity: 0.9;
+    }
+    .geo-art__circle--2 {
+      width: 130px; height: 130px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      bottom: 10px; right: 10px;
+      opacity: 0.85;
+    }
+    .geo-art__rect {
+      position: absolute;
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      top: 10px; right: 30px;
+      border-radius: 16px;
+      transform: rotate(20deg);
+      opacity: 0.9;
+    }
+    .geo-art__ring {
+      position: absolute;
+      width: 120px; height: 120px;
+      border: 14px solid rgba(99,102,241,0.35);
+      border-radius: 50%;
+      bottom: 5px; left: 5px;
+    }
+
+    /* ============================================================
+       3. Full Background Hero
+       ============================================================ */
+    .hero-fullbg {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 40%, #0f2744 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem;
+    }
+    .hero-fullbg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 50%, rgba(99,102,241,0.25) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 30%, rgba(6,182,212,0.2) 0%, transparent 70%);
+    }
+    .hero-fullbg__inner { position: relative; z-index: 1; max-width: 680px; }
+    .hero-fullbg__badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-fullbg__title {
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero-fullbg__sub {
+      color: rgba(255,255,255,0.7);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero-fullbg__btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hbtn--glow {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(99,102,241,0.5);
+    }
+    .hbtn--glow:hover { box-shadow: 0 0 50px rgba(99,102,241,0.7); transform: translateY(-2px); }
+
+    /* ============================================================
+       4. Animated Gradient Hero
+       ============================================================ */
+    @keyframes hero-gradient-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .hero-gradient {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981, #f59e0b, #ef4444);
+      background-size: 400% 400%;
+      animation: hero-gradient-shift 8s ease infinite;
+      padding: 3rem 2rem;
+    }
+    .hero-gradient__inner { max-width: 600px; }
+    .hero-gradient__title {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    .hero-gradient__sub {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hbtn--glass {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.5);
+      backdrop-filter: blur(8px);
+    }
+    .hbtn--glass:hover { background: rgba(255,255,255,0.35); transform: translateY(-2px); }
+
+    /* ============================================================
+       5. Animated Particles Hero (CSS-based)
+       ============================================================ */
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+      50%       { transform: translateY(-20px) scale(1.1); opacity: 1; }
+    }
+    .hero-particles {
+      min-height: 400px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem;
+    }
+    .particles-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: float-particle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+    }
+    .hero-particles__inner { position: relative; z-index: 1; max-width: 600px; }
+    .hero-particles__title {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .hero-particles__sub {
+      color: rgba(255,255,255,0.7);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ============================================================
+       6. Video Background Hero
+       ============================================================ */
+    .hero-video {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem;
+      background: #0f172a;
+    }
+    .hero-video__bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .hero-video__placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.12);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      user-select: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+    .hero-video__placeholder-icon {
+      font-size: 5rem;
+      opacity: 0.07;
+    }
+    .hero-video__placeholder-label {
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      opacity: 0.12;
+    }
+    /* scanline overlay */
+    .hero-video__scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+    }
+    /* gradient overlay on top of video */
+    .hero-video__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.2) 100%);
+    }
+    .hero-video__inner { position: relative; z-index: 2; max-width: 640px; }
+    .hero-video__play {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      backdrop-filter: blur(6px);
+    }
+    .hero-video__play:hover { transform: scale(1.1); background: rgba(255,255,255,0.25); }
+    .hero-video__play-icon {
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 12px 0 12px 22px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px;
+    }
+    .hero-video__title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .hero-video__sub {
+      color: rgba(255,255,255,0.75);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ============================================================
+       7. Typed Text Hero
+       ============================================================ */
+    .hero-typed {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--surface);
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-typed::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+    }
+    .hero-typed::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+    }
+    .hero-typed__inner { position: relative; z-index: 1; max-width: 640px; }
+    .hero-typed__pre {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
+    }
+    .hero-typed__row {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .hero-typed__static { color: var(--text); }
+    .hero-typed__dynamic {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      min-width: 2ch;
+    }
+    .hero-typed__cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: #6366f1;
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .hero-typed__sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ============================================================
+       8. Parallax Scroll Hero
+       ============================================================ */
+    .hero-parallax {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem;
+    }
+    .hero-parallax__bg {
+      position: absolute;
+      inset: -60px;
+      background: linear-gradient(160deg, #1e293b 0%, #0f172a 40%, #0c1a35 100%);
+      will-change: transform;
+      transition: transform 0.05s linear;
+    }
+    .hero-parallax__stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 90%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 15% 55%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(2px 2px at 45% 25%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(2px 2px at 70% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.5) 0%, transparent 100%);
+      background-repeat: no-repeat;
+    }
+    .hero-parallax__glow {
+      position: absolute;
+      width: 500px; height: 300px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%);
+    }
+    .hero-parallax__inner { position: relative; z-index: 1; max-width: 640px; }
+    .hero-parallax__label {
+      display: inline-block;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-parallax__title {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero-parallax__sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero-parallax__hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+    }
+    @keyframes bounce-down {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(5px); }
+    }
+    .hero-parallax__arrow {
+      animation: bounce-down 1.4s ease-in-out infinite;
+      font-size: 1rem;
+    }
+
+    /* ============================================================
+       9. Geometric Shapes Hero
+       ============================================================ */
+    @keyframes geo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes geo-float {
+      0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+      50%       { transform: translateY(-18px) rotate(var(--rot, 0deg)); }
+    }
+    .hero-geo {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem;
+    }
+    [data-theme="dark"] .hero-geo {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .geo-shape {
+      position: absolute;
+      pointer-events: none;
+      animation: geo-float var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+    }
+    .geo-shape--circle { border-radius: 50%; }
+    .geo-shape--spin   { animation: geo-spin var(--dur, 12s) linear infinite; }
+    .hero-geo__inner { position: relative; z-index: 1; max-width: 580px; }
+    .hero-geo__label {
+      display: inline-block;
+      background: rgba(99,102,241,0.1);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(99,102,241,0.25);
+    }
+    .hero-geo__title {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero-geo__sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hbtn--indigo {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+    }
+    .hbtn--indigo:hover { box-shadow: 0 8px 32px rgba(99,102,241,0.5); transform: translateY(-2px); color: #fff; }
+
+    /* ============================================================
+       10. Wave Bottom Hero
+       ============================================================ */
+    .hero-wave {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 60%, #06b6d4 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 3rem 2rem 5rem;
+    }
+    .hero-wave__inner { max-width: 640px; position: relative; z-index: 1; }
+    .hero-wave__title {
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero-wave__sub {
+      color: rgba(255,255,255,0.85);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero-wave__btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-wave__svg {
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+    .hero-wave__svg svg { display: block; width: 100%; }
+
+    /* ============================================================
+       11. 3D Perspective Hero
+       ============================================================ */
+    .hero-3d {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+      padding: 3rem 2rem;
+      perspective: 1000px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-3d::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 50%, rgba(99,102,241,0.15) 0%, transparent 70%);
+    }
+    .hero-3d__stage {
+      transform: rotateX(6deg) rotateY(-4deg);
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+      will-change: transform;
+    }
+    .hero-3d__stage:hover {
+      transform: rotateX(0deg) rotateY(0deg);
+    }
+    .hero-3d__card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 3rem 3.5rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(255,255,255,0.06) inset;
+      max-width: 560px;
+      transform: translateZ(30px);
+    }
+    .hero-3d__badge {
+      display: inline-block;
+      background: rgba(99,102,241,0.25);
+      border: 1px solid rgba(99,102,241,0.4);
+      color: #a5b4fc;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-3d__title {
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero-3d__sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero-3d__btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hbtn--purple-glow {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 0 40px rgba(99,102,241,0.5);
+    }
+    .hbtn--purple-glow:hover { box-shadow: 0 0 60px rgba(99,102,241,0.7); transform: translateY(-2px); color: #fff; }
+    .hbtn--ghost-white {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .hbtn--ghost-white:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">&#10022;</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">&#9728;</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">&#9790;</span>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     Layout
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- ---- Sidebar ---- -->
+  <aside class="sidebar" id="sidebar">
+    <p class="sidebar-section-title">Navigation</p>
+    <a href="../index.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <p class="sidebar-section-title">Components</p>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </aside>
+
+  <!-- ---- Main Content ---- -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">&#8250;</span>
+      <span class="breadcrumb-current">Heroes</span>
+    </nav>
+
+    <!-- Page heading -->
+    <h1 class="section-title">Heroes</h1>
+    <p class="section-subtitle">11 hero section variants — from simple centered text to 3D perspective cards, all built with pure HTML, CSS and Vanilla JS.</p>
+
+    <!-- ============================================================
+         1. Centered Text Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Centered Text Hero</span>
+        <button class="show-code-btn" data-target="code-1">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-centered">
+          <div class="hero-centered__inner">
+            <span class="hero-centered__eyebrow">&#10022; New Release v2.0</span>
+            <h2 class="hero-centered__title">Build Beautiful<br>Interfaces Faster</h2>
+            <p class="hero-centered__sub">A complete UI component catalog built with pure HTML, CSS and Vanilla JS. No dependencies, no frameworks — just clean, copy-paste ready code.</p>
+            <div class="hero-centered__btns">
+              <a href="#" class="hbtn hbtn--white">Get Started &#8594;</a>
+              <a href="#" class="hbtn hbtn--outline">View Components</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-1">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="hero-centered"&gt;
+  &lt;span class="eyebrow"&gt;New Release&lt;/span&gt;
+  &lt;h1&gt;Build Beautiful Interfaces Faster&lt;/h1&gt;
+  &lt;p&gt;Subtitle text here.&lt;/p&gt;
+  &lt;div class="btns"&gt;
+    &lt;a href="#" class="btn-white"&gt;Get Started&lt;/a&gt;
+    &lt;a href="#" class="btn-outline"&gt;View Components&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.hero-centered {
+  min-height: 400px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+  padding: 3rem 2rem;
+}
+&lt;/style&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         2. Split Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Split Hero</span>
+        <button class="show-code-btn" data-target="code-2">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-split">
+          <div class="hero-split__left">
+            <div class="hero-split__content">
+              <span class="hero-split__tag">Design System</span>
+              <h2 class="hero-split__title">Create with<br>Confidence</h2>
+              <p class="hero-split__text">Every component is hand-crafted, accessible and ready to drop straight into your project. No build step required.</p>
+              <a href="#" class="hero-split__btn">Explore Components &#8594;</a>
+            </div>
+          </div>
+          <div class="hero-split__right">
+            <div class="geo-art">
+              <div class="geo-art__circle geo-art__circle--1"></div>
+              <div class="geo-art__circle geo-art__circle--2"></div>
+              <div class="geo-art__rect"></div>
+              <div class="geo-art__ring"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-2">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="hero-split"&gt;
+  &lt;div class="hero-split__left"&gt;
+    &lt;h1&gt;Create with Confidence&lt;/h1&gt;
+    &lt;p&gt;Description text.&lt;/p&gt;
+    &lt;a href="#"&gt;Explore &rarr;&lt;/a&gt;
+  &lt;/div&gt;
+  &lt;div class="hero-split__right"&gt;
+    &lt;!-- CSS Geometric Art --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.hero-split { min-height: 400px; display: flex; }
+.hero-split__left  { flex: 1; display: flex; align-items: center; padding: 3rem 2.5rem; }
+.hero-split__right { flex: 1; background: linear-gradient(135deg, #0f172a, #1e293b); }
+&lt;/style&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         3. Full Background Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Full Background Hero</span>
+        <button class="show-code-btn" data-target="code-3">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-fullbg">
+          <div class="hero-fullbg__inner">
+            <span class="hero-fullbg__badge">&#127381; Award Winning Design</span>
+            <h2 class="hero-fullbg__title">Beyond the Ordinary.<br>Into the Extraordinary.</h2>
+            <p class="hero-fullbg__sub">Deep dark backgrounds with radial gradient lighting simulate cinematic photo backgrounds — no images needed, fully CSS-driven.</p>
+            <div class="hero-fullbg__btns">
+              <a href="#" class="hbtn hbtn--glow">Discover More &#8594;</a>
+              <a href="#" class="hbtn hbtn--outline">Watch Demo</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-3">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="hero-fullbg"&gt;
+  &lt;div class="hero-fullbg__inner"&gt;
+    &lt;h1&gt;Beyond the Ordinary.&lt;/h1&gt;
+    &lt;p&gt;Subtitle text.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.hero-fullbg {
+  min-height: 400px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #0f172a, #1e3a5f, #0f2744);
+  position: relative; overflow: hidden;
+}
+.hero-fullbg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(99,102,241,.25), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 80% 30%, rgba(6,182,212,.2), transparent 70%);
+}
+&lt;/style&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         4. Animated Gradient Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Animated Gradient Hero</span>
+        <button class="show-code-btn" data-target="code-4">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-gradient">
+          <div class="hero-gradient__inner">
+            <h2 class="hero-gradient__title">Always in Motion,<br>Always Beautiful</h2>
+            <p class="hero-gradient__sub">A CSS keyframe animation cycles through six hues creating a mesmerising living gradient background — no JavaScript required.</p>
+            <a href="#" class="hbtn hbtn--glass">Explore the Palette &#8594;</a>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-4">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;style&gt;
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-gradient {
+  background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981, #f59e0b, #ef4444);
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+&lt;/style&gt;
+
+&lt;div class="hero-gradient"&gt;
+  &lt;h1&gt;Always in Motion, Always Beautiful&lt;/h1&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         5. Animated Particles Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Animated Particles Hero</span>
+        <button class="show-code-btn" data-target="code-5">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-particles" id="hero-particles">
+          <div class="particles-bg" id="particles-bg"></div>
+          <div class="hero-particles__inner">
+            <h2 class="hero-particles__title">Float Through Space</h2>
+            <p class="hero-particles__sub">CSS-animated floating particles create depth and life. Each dot has a randomised size, position, colour and animation duration.</p>
+            <a href="#" class="hbtn hbtn--white">Get Floating &#8594;</a>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-5">
+        <button class="copy-btn">Copy</button>
+        <pre><code>@keyframes float-particle {
+  0%, 100% { transform: translateY(0); opacity: .7; }
+  50%       { transform: translateY(-20px); opacity: 1; }
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: float-particle var(--dur) ease-in-out var(--delay) infinite;
+}
+
+/* JS: generate particles */
+const bg = document.getElementById('particles-bg');
+for (let i = 0; i &lt; 40; i++) {
+  const s = document.createElement('span');
+  s.className = 'particle';
+  const size = Math.random() * 12 + 4;
+  const colors = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b'];
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%; top:${Math.random()*100}%;
+    background:${colors[Math.floor(Math.random()*colors.length)]};
+    opacity:${Math.random()*.5+.2};
+    --dur:${(Math.random()*4+2).toFixed(1)}s;
+    --delay:-${(Math.random()*5).toFixed(1)}s;
+  `;
+  bg.appendChild(s);
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         6. Video Background Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Video Background Hero</span>
+        <button class="show-code-btn" data-target="code-6">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-video">
+          <div class="hero-video__bg">
+            <div class="hero-video__placeholder">
+              <div class="hero-video__placeholder-icon">&#9654;</div>
+              <div class="hero-video__placeholder-label">VIDEO</div>
+            </div>
+            <div class="hero-video__scanlines"></div>
+          </div>
+          <div class="hero-video__overlay"></div>
+          <div class="hero-video__inner">
+            <div class="hero-video__play" role="button" aria-label="Play video">
+              <div class="hero-video__play-icon"></div>
+            </div>
+            <h2 class="hero-video__title">Stories Worth Telling</h2>
+            <p class="hero-video__sub">Replace the placeholder div with a muted, looping &lt;video&gt; element. The gradient overlay keeps text readable regardless of video content.</p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+              <a href="#" class="hbtn hbtn--white">Watch Now</a>
+              <a href="#" class="hbtn hbtn--outline">Learn More</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-6">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="hero-video"&gt;
+  &lt;video autoplay muted loop playsinline class="hero-video__bg"&gt;
+    &lt;source src="video.mp4" type="video/mp4"&gt;
+  &lt;/video&gt;
+  &lt;div class="hero-video__overlay"&gt;&lt;/div&gt;
+  &lt;div class="hero-video__inner"&gt;
+    &lt;h1&gt;Stories Worth Telling&lt;/h1&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.hero-video { position: relative; min-height: 400px; overflow: hidden; }
+.hero-video video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.hero-video__overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.2));
+}
+.hero-video__inner { position: relative; z-index: 1; }
+&lt;/style&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         7. Typed Text Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. Typed Text Hero</span>
+        <button class="show-code-btn" data-target="code-7">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-typed">
+          <div class="hero-typed__inner">
+            <p class="hero-typed__pre">Hello, I am a</p>
+            <div class="hero-typed__row">
+              <span class="hero-typed__static">Creative</span>
+              <span class="hero-typed__dynamic" id="typed-target"></span><span class="hero-typed__cursor"></span>
+            </div>
+            <p class="hero-typed__sub">A pure Vanilla JS typing animation cycles through a list of words — no library needed. Configurable speed, words and loop behaviour.</p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+              <a href="#" class="hbtn hbtn--indigo">Hire Me &#8594;</a>
+              <a href="#" class="hbtn" style="background:var(--surface-2);color:var(--text);">View Portfolio</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-7">
+        <button class="copy-btn">Copy</button>
+        <pre><code>const target = document.getElementById('typed-target');
+const words = ['Developer', 'Designer', 'Creator'];
+let i = 0, j = 0, isDeleting = false;
+
+function type() {
+  const word = words[i % words.length];
+  target.textContent = isDeleting
+    ? word.substring(0, j--)
+    : word.substring(0, j++);
+
+  if (!isDeleting &amp;&amp; j &gt; word.length) {
+    isDeleting = true;
+    setTimeout(type, 1500);
+    return;
+  }
+  if (isDeleting &amp;&amp; j &lt; 0) {
+    isDeleting = false;
+    i++;
+  }
+  setTimeout(type, isDeleting ? 80 : 120);
+}
+
+type();</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         8. Parallax Scroll Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">8. Parallax Scroll Hero</span>
+        <button class="show-code-btn" data-target="code-8">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap" id="parallax-wrap">
+        <div class="hero-parallax" id="hero-parallax">
+          <div class="hero-parallax__bg" id="parallax-bg">
+            <div class="hero-parallax__stars"></div>
+            <div class="hero-parallax__glow"></div>
+          </div>
+          <div class="hero-parallax__inner">
+            <span class="hero-parallax__label">&#11088; Scroll to Experience</span>
+            <h2 class="hero-parallax__title">Depth Through Motion</h2>
+            <p class="hero-parallax__sub">The background layer translates at half the speed of the content on scroll, creating a classic parallax depth effect — pure JS, no libraries.</p>
+            <a href="#" class="hbtn hbtn--glow">Explore &#8594;</a>
+            <div class="hero-parallax__hint" style="margin-top:1.5rem;">
+              <span class="hero-parallax__arrow">&#8595;</span>
+              <span>Scroll down</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-8">
+        <button class="copy-btn">Copy</button>
+        <pre><code>const heroBg = document.getElementById('parallax-bg');
+const heroWrap = document.getElementById('parallax-wrap');
+
+window.addEventListener('scroll', () => {
+  const rect = heroWrap.getBoundingClientRect();
+  if (rect.bottom &lt; 0 || rect.top &gt; window.innerHeight) return;
+  const offset = -rect.top * 0.4; // 40% parallax speed
+  heroBg.style.transform = `translateY(${offset}px)`;
+}, { passive: true });</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         9. Geometric Shapes Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">9. Geometric Shapes Hero</span>
+        <button class="show-code-btn" data-target="code-9">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-geo">
+          <!-- Shapes -->
+          <div class="geo-shape geo-shape--circle" style="width:120px;height:120px;background:rgba(99,102,241,0.15);top:-20px;left:-20px;--dur:5s;--delay:-1s;"></div>
+          <div class="geo-shape geo-shape--circle" style="width:200px;height:200px;background:rgba(139,92,246,0.1);top:60px;right:-60px;--dur:6s;--delay:-2s;"></div>
+          <div class="geo-shape" style="width:60px;height:60px;background:rgba(6,182,212,0.2);border-radius:12px;bottom:30px;left:80px;--rot:30deg;--dur:4s;--delay:-0.5s;"></div>
+          <div class="geo-shape" style="width:45px;height:45px;background:rgba(245,158,11,0.2);border-radius:8px;top:40px;right:120px;--rot:-15deg;--dur:5s;--delay:-3s;"></div>
+          <div class="geo-shape geo-shape--circle" style="width:80px;height:80px;border:3px solid rgba(99,102,241,0.2);bottom:50px;right:60px;--dur:7s;--delay:-1.5s;"></div>
+          <div class="geo-shape geo-shape--spin" style="width:50px;height:50px;border:2px solid rgba(139,92,246,0.3);top:30%;left:8%;--dur:15s;"></div>
+          <div class="geo-shape geo-shape--circle" style="width:30px;height:30px;background:rgba(16,185,129,0.25);top:20%;left:15%;--dur:3.5s;--delay:-2s;"></div>
+          <div class="geo-shape" style="width:35px;height:35px;background:rgba(239,68,68,0.2);border-radius:6px;bottom:20%;right:12%;--rot:45deg;--dur:4.5s;--delay:-1s;"></div>
+
+          <div class="hero-geo__inner">
+            <span class="hero-geo__label">&#10043; Pure CSS Art</span>
+            <h2 class="hero-geo__title">Structure is Beautiful</h2>
+            <p class="hero-geo__sub">Circles, squares and rings animate independently with staggered delays, creating an organic floating composition — no images, no SVG files.</p>
+            <a href="#" class="hbtn hbtn--indigo">Start Building &#8594;</a>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-9">
+        <button class="copy-btn">Copy</button>
+        <pre><code>@keyframes geo-float {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50%       { transform: translateY(-18px) rotate(var(--rot, 0deg)); }
+}
+.geo-shape {
+  position: absolute;
+  pointer-events: none;
+  animation: geo-float var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+}
+
+&lt;div class="geo-shape geo-shape--circle"
+  style="width:120px;height:120px;
+         background:rgba(99,102,241,0.15);
+         top:-20px;left:-20px;
+         --dur:5s;--delay:-1s;"&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         10. Wave Bottom Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">10. Wave Bottom Hero</span>
+        <button class="show-code-btn" data-target="code-10">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-wave">
+          <div class="hero-wave__inner">
+            <h2 class="hero-wave__title">Ride the Wave of<br>Modern Design</h2>
+            <p class="hero-wave__sub">An inline SVG wave shape at the bottom of the hero blends seamlessly into the page background. Fully scalable, no image files.</p>
+            <div class="hero-wave__btns">
+              <a href="#" class="hbtn hbtn--white">Get Started &#8594;</a>
+              <a href="#" class="hbtn hbtn--outline">Learn More</a>
+            </div>
+          </div>
+          <div class="hero-wave__svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:80px;">
+              <path fill="var(--bg)" d="M0,40 C180,80 360,0 540,40 C720,80 900,0 1080,40 C1260,80 1380,20 1440,40 L1440,80 L0,80 Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-10">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="hero-wave"&gt;
+  &lt;div class="hero-wave__inner"&gt;
+    &lt;h1&gt;Ride the Wave&lt;/h1&gt;
+  &lt;/div&gt;
+  &lt;div class="hero-wave__svg"&gt;
+    &lt;svg viewBox="0 0 1440 80" preserveAspectRatio="none"&gt;
+      &lt;path fill="var(--bg)"
+        d="M0,40 C180,80 360,0 540,40
+           C720,80 900,0 1080,40
+           C1260,80 1380,20 1440,40
+           L1440,80 L0,80 Z"/&gt;
+    &lt;/svg&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.hero-wave { position: relative; overflow: hidden; padding-bottom: 5rem; }
+.hero-wave__svg {
+  position: absolute; bottom: -2px; left: 0; width: 100%;
+}
+.hero-wave__svg svg { display: block; width: 100%; }
+&lt;/style&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         11. 3D Perspective Hero
+         ============================================================ -->
+    <section class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">11. 3D Perspective Hero</span>
+        <button class="show-code-btn" data-target="code-11">&#9654; Show Code</button>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-3d">
+          <div class="hero-3d__stage" id="hero-3d-stage">
+            <div class="hero-3d__card">
+              <span class="hero-3d__badge">&#9685; Perspective Transform</span>
+              <h2 class="hero-3d__title">Design in Three<br>Dimensions</h2>
+              <p class="hero-3d__sub">CSS perspective and rotateX/rotateY transforms give the card a tilt. Hover over it to watch the card flatten back to face — or move your mouse for live 3D tracking.</p>
+              <div class="hero-3d__btns">
+                <a href="#" class="hbtn hbtn--purple-glow">Explore &#8594;</a>
+                <a href="#" class="hbtn hbtn--ghost-white">Learn More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-11">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;style&gt;
+.hero-3d {
+  perspective: 1000px;
+}
+.hero-3d__stage {
+  transform: rotateX(6deg) rotateY(-4deg);
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+.hero-3d__stage:hover {
+  transform: rotateX(0deg) rotateY(0deg);
+}
+.hero-3d__card {
+  transform: translateZ(30px);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+}
+&lt;/style&gt;
+
+&lt;!-- JS: live mouse tracking --&gt;
+&lt;script&gt;
+const stage = document.getElementById('hero-3d-stage');
+stage.closest('.hero-3d').addEventListener('mousemove', e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 20;
+  const y = ((e.clientY - rect.top)  / rect.height - 0.5) * -14;
+  stage.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+stage.closest('.hero-3d').addEventListener('mouseleave', () => {
+  stage.style.transform = 'rotateX(6deg) rotateY(-4deg)';
+});
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+  </main><!-- /main-content -->
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ============================================================
+     Hero 5 — CSS Particles (generated by JS)
+     ============================================================ */
+  (function initParticles() {
+    const bg = document.getElementById('particles-bg');
+    if (!bg) return;
+    const colors = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
+    for (let i = 0; i < 45; i++) {
+      const span = document.createElement('span');
+      span.className = 'particle';
+      const size   = Math.random() * 14 + 4;
+      const color  = colors[Math.floor(Math.random() * colors.length)];
+      const dur    = (Math.random() * 4 + 2).toFixed(1);
+      const delay  = -(Math.random() * 6).toFixed(1);
+      const left   = (Math.random() * 100).toFixed(1);
+      const top    = (Math.random() * 100).toFixed(1);
+      const opacity = (Math.random() * 0.45 + 0.15).toFixed(2);
+      span.style.cssText = [
+        `width:${size}px`, `height:${size}px`,
+        `left:${left}%`,   `top:${top}%`,
+        `background:${color}`, `opacity:${opacity}`,
+        `--dur:${dur}s`,   `--delay:${delay}s`
+      ].join(';');
+      bg.appendChild(span);
+    }
+  })();
+
+  /* ============================================================
+     Hero 7 — Typing Animation
+     ============================================================ */
+  (function initTyped() {
+    const target = document.getElementById('typed-target');
+    if (!target) return;
+    const words = ['Developer', 'Designer', 'Creator'];
+    let i = 0, j = 0, isDeleting = false;
+
+    function type() {
+      const word = words[i % words.length];
+      target.textContent = isDeleting ? word.substring(0, j--) : word.substring(0, j++);
+
+      if (!isDeleting && j > word.length) {
+        isDeleting = true;
+        setTimeout(type, 1500);
+        return;
+      }
+      if (isDeleting && j < 0) {
+        isDeleting = false;
+        i++;
+      }
+      setTimeout(type, isDeleting ? 80 : 120);
+    }
+
+    type();
+  })();
+
+  /* ============================================================
+     Hero 8 — Parallax Scroll
+     ============================================================ */
+  (function initParallax() {
+    const bg   = document.getElementById('parallax-bg');
+    const wrap = document.getElementById('parallax-wrap');
+    if (!bg || !wrap) return;
+
+    function onScroll() {
+      const rect = wrap.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      const offset = -rect.top * 0.4;
+      bg.style.transform = 'translateY(' + offset + 'px)';
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // run once on load
+  })();
+
+  /* ============================================================
+     Hero 11 — 3D Mouse Tracking
+     ============================================================ */
+  (function init3D() {
+    const stage = document.getElementById('hero-3d-stage');
+    if (!stage) return;
+    const hero = stage.closest('.hero-3d');
+
+    hero.addEventListener('mousemove', function(e) {
+      const rect = hero.getBoundingClientRect();
+      const x =  ((e.clientX - rect.left)  / rect.width  - 0.5) * 22;
+      const y = -((e.clientY - rect.top)   / rect.height - 0.5) * 16;
+      stage.style.transform = 'rotateX(' + y + 'deg) rotateY(' + x + 'deg)';
+    });
+
+    hero.addEventListener('mouseleave', function() {
+      stage.style.transform = 'rotateX(6deg) rotateY(-4deg)';
+    });
+  })();
+</script>
+</body>
+</html>

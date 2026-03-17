@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toggles — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Toggle / Switch — page-specific styles
+       ============================================================ */
+
+    /* Base toggle structure */
+    .toggle-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .toggle-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-track {
+      display: block;
+      width: 52px;
+      height: 28px;
+      background: var(--gray-300);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s;
+      position: relative;
+    }
+    .toggle-wrap input:checked + .toggle-track {
+      background: var(--primary);
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .toggle-wrap input:checked ~ .toggle-thumb {
+      transform: translateX(24px);
+    }
+
+    /* Demo row layout */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .toggle-label-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      min-width: 120px;
+    }
+
+    /* ── 1. iOS Style ── */
+    .toggle-ios .toggle-track {
+      width: 51px;
+      height: 31px;
+      background: var(--gray-300);
+      border-radius: 9999px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      transition: background 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-ios input:checked + .toggle-track {
+      background: #34c759; /* iOS green */
+    }
+    .toggle-ios .toggle-thumb {
+      top: 2px;
+      left: 2px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.1);
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1), box-shadow 0.2s;
+    }
+    .toggle-ios input:checked ~ .toggle-thumb {
+      transform: translateX(20px);
+      box-shadow: 0 3px 8px rgba(52,199,89,0.4), 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* ── 2. Material Design Toggle ── */
+    .toggle-material .toggle-track {
+      width: 56px;
+      height: 24px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 9999px;
+      transition: background 0.25s;
+      overflow: visible;
+    }
+    .toggle-material input:checked + .toggle-track {
+      background: rgba(99,102,241,0.5);
+    }
+    .toggle-material .toggle-thumb {
+      top: -2px;
+      left: -2px;
+      width: 28px;
+      height: 28px;
+      background: var(--gray-400);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    .toggle-material input:checked ~ .toggle-thumb {
+      transform: translateX(32px);
+      background: var(--primary);
+    }
+    /* Ripple */
+    .toggle-material .toggle-thumb::before {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(99,102,241,0);
+      transition: background 0.25s;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+    .toggle-material input:checked ~ .toggle-thumb::before {
+      background: rgba(99,102,241,0.12);
+    }
+    .toggle-material .toggle-thumb:active::before {
+      background: rgba(99,102,241,0.22);
+    }
+
+    /* ── 3. Labeled Toggle (ON/OFF) ── */
+    .toggle-labeled .toggle-track {
+      width: 68px;
+      height: 30px;
+      background: var(--gray-300);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      transition: background 0.3s;
+      overflow: hidden;
+    }
+    .toggle-labeled input:checked + .toggle-track {
+      background: var(--success);
+    }
+    .toggle-labeled .toggle-track-label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .toggle-labeled .label-on {
+      position: absolute;
+      left: 10px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .toggle-labeled .label-off {
+      position: absolute;
+      right: 8px;
+      color: var(--gray-500);
+      opacity: 1;
+      transition: opacity 0.2s;
+    }
+    .toggle-labeled input:checked ~ .toggle-track-label .label-on { opacity: 1; }
+    .toggle-labeled input:checked ~ .toggle-track-label .label-off { opacity: 0; }
+    .toggle-labeled .toggle-thumb {
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      z-index: 1;
+    }
+    .toggle-labeled input:checked ~ .toggle-thumb {
+      transform: translateX(38px);
+    }
+
+    /* ── 4. Color-changing Toggle (red=off, green=on) ── */
+    .toggle-color .toggle-track {
+      width: 52px;
+      height: 28px;
+      background: var(--danger);
+      border-radius: 9999px;
+      transition: background 0.3s;
+    }
+    .toggle-color input:checked + .toggle-track {
+      background: var(--success);
+    }
+    .toggle-color .toggle-thumb {
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      transition: transform 0.3s;
+    }
+    .toggle-color input:checked ~ .toggle-thumb {
+      transform: translateX(24px);
+    }
+
+    /* ── 5. Day/Night Toggle ── */
+    .toggle-daynight .toggle-track {
+      width: 62px;
+      height: 32px;
+      background: linear-gradient(135deg, #87ceeb, #ffd700);
+      border-radius: 9999px;
+      transition: background 0.5s;
+      overflow: hidden;
+      position: relative;
+    }
+    .toggle-daynight input:checked + .toggle-track {
+      background: linear-gradient(135deg, #1a1a3e, #2d1b69);
+    }
+    /* Stars */
+    .toggle-daynight .toggle-track::before {
+      content: '✦ ✧ ✦';
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 7px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.4s 0.1s;
+      letter-spacing: 1px;
+    }
+    .toggle-daynight input:checked + .toggle-track::before {
+      opacity: 1;
+    }
+    .toggle-daynight .toggle-thumb {
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      box-shadow: none;
+      transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+      z-index: 2;
+    }
+    .toggle-daynight .thumb-icon-sun {
+      position: absolute;
+      transition: opacity 0.3s;
+    }
+    .toggle-daynight .thumb-icon-moon {
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .toggle-daynight input:checked ~ .toggle-thumb .thumb-icon-sun { opacity: 0; }
+    .toggle-daynight input:checked ~ .toggle-thumb .thumb-icon-moon { opacity: 1; }
+    .toggle-daynight input:checked ~ .toggle-thumb {
+      transform: translateX(30px);
+    }
+
+    /* ── 6. Large Toggle ── */
+    .toggle-large .toggle-track {
+      width: 80px;
+      height: 40px;
+      background: var(--gray-300);
+      border-radius: 9999px;
+      transition: background 0.3s;
+    }
+    .toggle-large input:checked + .toggle-track {
+      background: var(--primary);
+    }
+    .toggle-large .toggle-thumb {
+      top: 4px;
+      left: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-large input:checked ~ .toggle-thumb {
+      transform: translateX(40px);
+    }
+
+    /* ── 7. Square Toggle ── */
+    .toggle-square .toggle-track {
+      width: 56px;
+      height: 28px;
+      background: var(--gray-300);
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    .toggle-square input:checked + .toggle-track {
+      background: var(--info);
+    }
+    .toggle-square .toggle-thumb {
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.25s;
+    }
+    .toggle-square input:checked ~ .toggle-thumb {
+      transform: translateX(28px);
+    }
+
+    /* ── 8. Animated SVG Toggle (X → Checkmark) ── */
+    .toggle-animated .toggle-track {
+      width: 56px;
+      height: 28px;
+      background: var(--gray-300);
+      border-radius: 9999px;
+      transition: background 0.3s;
+    }
+    .toggle-animated input:checked + .toggle-track {
+      background: var(--success);
+    }
+    .toggle-animated .toggle-thumb {
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      background: white;
+    }
+    .toggle-animated input:checked ~ .toggle-thumb {
+      transform: translateX(28px);
+    }
+    .toggle-animated .icon-x,
+    .toggle-animated .icon-check {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      transition: opacity 0.2s, transform 0.3s;
+    }
+    .toggle-animated .icon-x {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+    .toggle-animated .icon-check {
+      opacity: 0;
+      transform: scale(0.5) rotate(-45deg);
+    }
+    .toggle-animated input:checked ~ .toggle-thumb .icon-x {
+      opacity: 0;
+      transform: scale(0.5) rotate(45deg);
+    }
+    .toggle-animated input:checked ~ .toggle-thumb .icon-check {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    /* Demo container extras */
+    .demo-block-body.column .toggle-row {
+      width: 100%;
+    }
+    .variant-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.55rem;
+      background: rgba(99,102,241,0.08);
+      color: var(--primary);
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     Layout
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+    <a href="../index.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Toggles</span>
+    </nav>
+
+    <!-- Section heading -->
+    <h1 class="section-title">Toggles</h1>
+    <p class="section-subtitle">8 toggle &amp; switch variants — all built with checkbox input + custom CSS. No JavaScript required for the toggle logic.</p>
+
+    <!-- ============================================================
+         1. iOS Style Toggle
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. iOS Style Toggle</span>
+        <span class="variant-tag">iOS / Classic</span>
+        <button class="show-code-btn" data-target="code-ios">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-ios">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Checked (green)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-ios">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Unchecked (gray)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-ios" style="opacity:0.45;pointer-events:none;">
+            <input type="checkbox" disabled>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Disabled</span>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-ios">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- iOS Style Toggle --&gt;
+&lt;style&gt;
+.toggle-ios .toggle-track {
+  width: 51px; height: 31px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+  transition: background 0.35s cubic-bezier(.4,0,.2,1);
+}
+.toggle-ios input:checked + .toggle-track { background: #34c759; }
+.toggle-ios .toggle-thumb {
+  top: 2px; left: 2px;
+  width: 27px; height: 27px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.toggle-ios input:checked ~ .toggle-thumb { transform: translateX(20px); }
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-ios"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         2. Material Design Toggle
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Material Design Toggle</span>
+        <span class="variant-tag">Material / Ripple</span>
+        <button class="show-code-btn" data-target="code-material">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-material">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Checked (indigo)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-material">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Unchecked</span>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-material">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Material Design Toggle with ripple --&gt;
+&lt;style&gt;
+.toggle-material .toggle-track {
+  width: 56px; height: 24px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 9999px;
+  transition: background 0.25s;
+  overflow: visible;
+}
+.toggle-material input:checked + .toggle-track { background: rgba(99,102,241,0.5); }
+.toggle-material .toggle-thumb {
+  top: -2px; left: -2px;
+  width: 28px; height: 28px;
+  background: #94a3b8;
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+}
+.toggle-material input:checked ~ .toggle-thumb {
+  transform: translateX(32px);
+  background: #6366f1;
+}
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-material"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         3. Labeled Toggle (ON / OFF)
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Labeled Toggle</span>
+        <span class="variant-tag">ON / OFF Text</span>
+        <button class="show-code-btn" data-target="code-labeled">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-labeled">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-track-label">
+              <span class="label-on">ON</span>
+              <span class="label-off">OFF</span>
+            </span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Checked — shows ON</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-labeled">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-track-label">
+              <span class="label-on">ON</span>
+              <span class="label-off">OFF</span>
+            </span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Unchecked — shows OFF</span>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-labeled">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Labeled Toggle (ON/OFF visible inside track) --&gt;
+&lt;style&gt;
+.toggle-labeled .toggle-track {
+  width: 68px; height: 30px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.toggle-labeled input:checked + .toggle-track { background: #10b981; }
+.label-on  { position:absolute; left:10px;  color:white;      opacity:0; transition:opacity .2s; font-size:.65rem; font-weight:700; }
+.label-off { position:absolute; right:8px;  color:#64748b;    opacity:1; transition:opacity .2s; font-size:.65rem; font-weight:700; }
+.toggle-labeled input:checked ~ .toggle-track-label .label-on  { opacity:1; }
+.toggle-labeled input:checked ~ .toggle-track-label .label-off { opacity:0; }
+.toggle-labeled .toggle-thumb {
+  top:3px; left:3px; width:24px; height:24px; z-index:1;
+  transition: transform 0.3s;
+}
+.toggle-labeled input:checked ~ .toggle-thumb { transform: translateX(38px); }
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-labeled"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-track-label"&gt;
+    &lt;span class="label-on"&gt;ON&lt;/span&gt;
+    &lt;span class="label-off"&gt;OFF&lt;/span&gt;
+  &lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         4. Color-changing Toggle (red=off, green=on)
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Color-changing Toggle</span>
+        <span class="variant-tag">Red / Green</span>
+        <button class="show-code-btn" data-target="code-color">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-color">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text" style="color:var(--success);font-weight:600;">ON — Active (green)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-color">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text" style="color:var(--danger);font-weight:600;">OFF — Inactive (red)</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Track color transitions from <strong style="color:var(--danger)">red</strong> (off) to <strong style="color:var(--success)">green</strong> (on).</p>
+      </div>
+      <div class="code-snippet" id="code-color">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Color-changing Toggle: red when off, green when on --&gt;
+&lt;style&gt;
+.toggle-color .toggle-track {
+  background: #ef4444; /* red = off */
+  transition: background 0.3s;
+}
+.toggle-color input:checked + .toggle-track {
+  background: #10b981; /* green = on */
+}
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-color"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         5. Day / Night Toggle
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Day / Night Toggle</span>
+        <span class="variant-tag">☀️ / 🌙 + Stars</span>
+        <button class="show-code-btn" data-target="code-daynight">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-daynight">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb">
+              <span class="thumb-icon-sun">☀️</span>
+              <span class="thumb-icon-moon">🌙</span>
+            </span>
+          </label>
+          <span class="toggle-label-text">Night mode (moon + stars)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-daynight">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb">
+              <span class="thumb-icon-sun">☀️</span>
+              <span class="thumb-icon-moon">🌙</span>
+            </span>
+          </label>
+          <span class="toggle-label-text">Day mode (sun, sky blue)</span>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-daynight">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Day/Night Toggle with emoji icons and star decoration --&gt;
+&lt;style&gt;
+.toggle-daynight .toggle-track {
+  width: 62px; height: 32px;
+  background: linear-gradient(135deg, #87ceeb, #ffd700);
+  border-radius: 9999px;
+  transition: background 0.5s;
+  overflow: hidden; position: relative;
+}
+.toggle-daynight input:checked + .toggle-track {
+  background: linear-gradient(135deg, #1a1a3e, #2d1b69);
+}
+.toggle-daynight .toggle-track::before {
+  content: '✦ ✧ ✦';
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  font-size: 7px; color: white; opacity: 0; transition: opacity 0.4s 0.1s;
+}
+.toggle-daynight input:checked + .toggle-track::before { opacity: 1; }
+.toggle-daynight .toggle-thumb {
+  top: 4px; left: 4px; width: 24px; height: 24px;
+  background: transparent; box-shadow: none;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+}
+.toggle-daynight input:checked ~ .toggle-thumb { transform: translateX(30px); }
+.thumb-icon-moon { opacity: 0; transition: opacity 0.3s; position: absolute; }
+.thumb-icon-sun  { transition: opacity 0.3s; position: absolute; }
+.toggle-daynight input:checked ~ .toggle-thumb .thumb-icon-sun  { opacity: 0; }
+.toggle-daynight input:checked ~ .toggle-thumb .thumb-icon-moon { opacity: 1; }
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-daynight"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;
+    &lt;span class="thumb-icon-sun"&gt;☀️&lt;/span&gt;
+    &lt;span class="thumb-icon-moon"&gt;🌙&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         6. Large Toggle
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Large Toggle</span>
+        <span class="variant-tag">80px × 40px</span>
+        <button class="show-code-btn" data-target="code-large">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row" style="align-items:center;">
+          <label class="toggle-wrap toggle-large">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Extra large — checked</span>
+        </div>
+        <div class="toggle-row" style="align-items:center;">
+          <label class="toggle-wrap toggle-large">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Extra large — unchecked</span>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-large">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Large Toggle: 80px × 40px --&gt;
+&lt;style&gt;
+.toggle-large .toggle-track {
+  width: 80px; height: 40px;
+  background: #cbd5e1; border-radius: 9999px;
+  transition: background 0.3s;
+}
+.toggle-large input:checked + .toggle-track { background: #6366f1; }
+.toggle-large .toggle-thumb {
+  top: 4px; left: 4px; width: 32px; height: 32px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+}
+.toggle-large input:checked ~ .toggle-thumb { transform: translateX(40px); }
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-large"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         7. Square Toggle
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. Square Toggle</span>
+        <span class="variant-tag">Rectangular / No Radius</span>
+        <button class="show-code-btn" data-target="code-square">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-square">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Checked (blue)</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-square">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+          <span class="toggle-label-text">Unchecked (gray)</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Track and thumb use <code>border-radius: 3–4px</code> for a sharp, industrial look.</p>
+      </div>
+      <div class="code-snippet" id="code-square">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Square / Rectangular Toggle --&gt;
+&lt;style&gt;
+.toggle-square .toggle-track {
+  width: 56px; height: 28px;
+  background: #cbd5e1;
+  border-radius: 4px; /* square, not pill */
+  transition: background 0.3s;
+}
+.toggle-square input:checked + .toggle-track { background: #3b82f6; }
+.toggle-square .toggle-thumb {
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  border-radius: 3px; /* square thumb */
+  transition: transform 0.25s;
+}
+.toggle-square input:checked ~ .toggle-thumb { transform: translateX(28px); }
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-square"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         8. Animated SVG Toggle (X → Checkmark morph)
+         ============================================================ -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">8. Animated Icon Toggle</span>
+        <span class="variant-tag">X → Checkmark Morph</span>
+        <button class="show-code-btn" data-target="code-animated">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-animated">
+            <input type="checkbox" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb">
+              <!-- X icon -->
+              <svg class="icon-x" viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round">
+                <line x1="2" y1="2" x2="10" y2="10"/>
+                <line x1="10" y1="2" x2="2" y2="10"/>
+              </svg>
+              <!-- Checkmark icon -->
+              <svg class="icon-check" viewBox="0 0 12 12" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1.5,6 4.5,9.5 10.5,2.5"/>
+              </svg>
+            </span>
+          </label>
+          <span class="toggle-label-text">Checked — shows checkmark</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-wrap toggle-animated">
+            <input type="checkbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb">
+              <svg class="icon-x" viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round">
+                <line x1="2" y1="2" x2="10" y2="10"/>
+                <line x1="10" y1="2" x2="2" y2="10"/>
+              </svg>
+              <svg class="icon-check" viewBox="0 0 12 12" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1.5,6 4.5,9.5 10.5,2.5"/>
+              </svg>
+            </span>
+          </label>
+          <span class="toggle-label-text">Unchecked — shows X</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">SVG icons fade &amp; scale between states using CSS transitions. No JS needed.</p>
+      </div>
+      <div class="code-snippet" id="code-animated">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Animated SVG Toggle: X morphs to checkmark --&gt;
+&lt;style&gt;
+.toggle-animated .toggle-track {
+  background: #cbd5e1; transition: background 0.3s;
+}
+.toggle-animated input:checked + .toggle-track { background: #10b981; }
+.toggle-animated .toggle-thumb {
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+}
+.toggle-animated input:checked ~ .toggle-thumb { transform: translateX(28px); }
+.icon-x, .icon-check {
+  position: absolute; width: 12px; height: 12px;
+  transition: opacity 0.2s, transform 0.3s;
+}
+.icon-x     { opacity: 1; transform: scale(1) rotate(0deg); }
+.icon-check { opacity: 0; transform: scale(0.5) rotate(-45deg); }
+.toggle-animated input:checked ~ .toggle-thumb .icon-x {
+  opacity: 0; transform: scale(0.5) rotate(45deg);
+}
+.toggle-animated input:checked ~ .toggle-thumb .icon-check {
+  opacity: 1; transform: scale(1) rotate(0deg);
+}
+&lt;/style&gt;
+
+&lt;label class="toggle-wrap toggle-animated"&gt;
+  &lt;input type="checkbox"&gt;
+  &lt;span class="toggle-track"&gt;&lt;/span&gt;
+  &lt;span class="toggle-thumb"&gt;
+    &lt;svg class="icon-x" viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"&gt;
+      &lt;line x1="2" y1="2" x2="10" y2="10"/&gt;&lt;line x1="10" y1="2" x2="2" y2="10"/&gt;
+    &lt;/svg&gt;
+    &lt;svg class="icon-check" viewBox="0 0 12 12" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"&gt;
+      &lt;polyline points="1.5,6 4.5,9.5 10.5,2.5"/&gt;
+    &lt;/svg&gt;
+  &lt;/span&gt;
+&lt;/label&gt;</code></pre>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+</body>
+</html>

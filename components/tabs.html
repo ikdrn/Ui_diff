@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabs — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Tabs Page — Component-specific styles
+       ============================================================ */
+
+    /* ---- Shared tab resets ---- */
+    .tab-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Panel content placeholder */
+    .panel-content {
+      padding: 1.25rem 1rem;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-top: 0.25rem;
+    }
+    .panel-content h4 {
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ============================================================
+       1. Basic Tabs — bottom border indicator
+       ============================================================ */
+    .tabs-basic .tab-list {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      gap: 0;
+    }
+    .tabs-basic .tab-btn {
+      padding: 0.65rem 1.25rem;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+    }
+    .tabs-basic .tab-btn:hover { color: var(--text); }
+    .tabs-basic .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* ============================================================
+       2. Pill Tabs — filled pill background on active
+       ============================================================ */
+    .tabs-pill .tab-list {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--surface-2);
+      padding: 0.35rem;
+      border-radius: var(--radius-full);
+      width: fit-content;
+    }
+    .tabs-pill .tab-btn {
+      padding: 0.5rem 1.2rem;
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .tabs-pill .tab-btn:hover { color: var(--text); }
+    .tabs-pill .tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       3. Underline Tabs — animated sliding underline indicator
+       ============================================================ */
+    .tabs-underline {
+      position: relative;
+    }
+    .tabs-underline .tab-list {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+    }
+    .tabs-underline .tab-btn {
+      padding: 0.65rem 1.25rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      position: relative;
+    }
+    .tabs-underline .tab-btn:hover { color: var(--text); }
+    .tabs-underline .tab-btn.active { color: var(--primary); }
+
+    /* Sliding underline marker */
+    .underline-indicator {
+      position: absolute;
+      bottom: -2px;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px 2px 0 0;
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                  width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       4. Vertical Tabs — stacked left, content on right
+       ============================================================ */
+    .tabs-vertical {
+      display: flex;
+      gap: 0;
+      min-height: 200px;
+    }
+    .tabs-vertical .tab-list {
+      display: flex;
+      flex-direction: column;
+      border-right: 2px solid var(--border);
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+    .tabs-vertical .tab-btn {
+      padding: 0.75rem 1.25rem;
+      text-align: left;
+      color: var(--text-muted);
+      border-right: 2px solid transparent;
+      margin-right: -2px;
+      font-weight: 500;
+    }
+    .tabs-vertical .tab-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .tabs-vertical .tab-btn.active {
+      color: var(--primary);
+      border-right-color: var(--primary);
+      background: rgba(99, 102, 241, 0.07);
+      font-weight: 600;
+    }
+    .tabs-vertical .tab-panels {
+      flex: 1;
+      padding: 0.5rem 1.5rem;
+    }
+    .tabs-vertical .tab-panel { display: none; }
+    .tabs-vertical .tab-panel.active { display: block; }
+
+    /* ============================================================
+       5. Icon Tabs — icon + label
+       ============================================================ */
+    .tabs-icon .tab-list {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      gap: 0;
+    }
+    .tabs-icon .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.25rem;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+    }
+    .tabs-icon .tab-btn svg { flex-shrink: 0; }
+    .tabs-icon .tab-btn:hover { color: var(--text); }
+    .tabs-icon .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* ============================================================
+       6. Scrollable Tabs — overflow-x auto, scrollbar hidden
+       ============================================================ */
+    .tabs-scrollable .tab-list-wrap {
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      border-bottom: 2px solid var(--border);
+    }
+    .tabs-scrollable .tab-list-wrap::-webkit-scrollbar { display: none; }
+    .tabs-scrollable .tab-list {
+      display: flex;
+      gap: 0;
+      width: max-content;
+    }
+    .tabs-scrollable .tab-btn {
+      padding: 0.65rem 1.25rem;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+    }
+    .tabs-scrollable .tab-btn:hover { color: var(--text); }
+    .tabs-scrollable .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* ============================================================
+       7. Animated Content Tabs — fade + translateY on switch
+       ============================================================ */
+    .tabs-animated .tab-list {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .tabs-animated .tab-btn {
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+    .tabs-animated .tab-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .tabs-animated .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Panels default state = invisible + shifted down */
+    .tabs-animated .tab-panel {
+      display: block;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      height: 0;
+      overflow: hidden;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .tabs-animated .tab-panel.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    /* ============================================================
+       8. Card Tabs — folder/card tabs, active tab is elevated
+       ============================================================ */
+    .tabs-card .tab-list {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      padding-bottom: 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .tabs-card .tab-btn {
+      padding: 0.6rem 1.25rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--radius) var(--radius) 0 0;
+      color: var(--text-muted);
+      font-weight: 500;
+      position: relative;
+      top: 2px;
+      transition: all var(--transition);
+    }
+    .tabs-card .tab-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      top: 0;
+    }
+    .tabs-card .tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      font-weight: 600;
+      top: -1px;
+      border-color: var(--border);
+      border-bottom-color: var(--surface);
+      box-shadow: var(--shadow-sm);
+      z-index: 1;
+    }
+    .tabs-card .tab-panels {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      background: var(--surface);
+    }
+    .tabs-card .tab-panel { display: none; }
+    .tabs-card .tab-panel.active { display: block; }
+    .tabs-card .tab-panel .panel-content {
+      background: transparent;
+      border-radius: 0;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+    <!-- Mobile hamburger -->
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     Layout
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- ---- Sidebar ---- -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Navigation</div>
+    <a href="../index.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+
+    <div class="sidebar-section-title" style="margin-top:0.75rem">Components</div>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </nav>
+
+  <!-- ---- Main Content ---- -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Tabs</span>
+    </nav>
+
+    <!-- Page heading -->
+    <h1 class="section-title">Tabs</h1>
+    <p class="section-subtitle">8 tab navigation variants — all powered by Vanilla JS. Click any tab to switch panels.</p>
+
+    <!-- ===========================================================
+         1. Basic Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Basic Tabs</span>
+        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-basic" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">Overview</button>
+            <button class="tab-btn" role="tab">Features</button>
+            <button class="tab-btn" role="tab">Pricing</button>
+            <button class="tab-btn" role="tab">Support</button>
+          </div>
+          <div class="tab-panels" style="margin-top:1rem">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Overview</h4>
+                <p>Simple horizontal tabs with a bottom border indicator. The active tab receives a colored underline that matches the primary brand color. Clean and minimal — suitable for most use cases.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Features</h4>
+                <p>Lightweight implementation with no dependencies. Keyboard-accessible tab list using role="tablist" and role="tab" attributes for screen-reader compatibility.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Pricing</h4>
+                <p>Free to use. Copy the HTML/CSS/JS snippet directly into your project. No attribution required.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Support</h4>
+                <p>Community-supported via GitHub. Check the issue tracker for known bugs and feature requests.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-basic">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="tabs-container tabs-basic"&gt;
+  &lt;div class="tab-list"&gt;
+    &lt;button class="tab-btn active"&gt;Overview&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Features&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Pricing&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panel active"&gt;...Overview content...&lt;/div&gt;
+  &lt;div class="tab-panel"&gt;...Features content...&lt;/div&gt;
+  &lt;div class="tab-panel"&gt;...Pricing content...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         2. Pill Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Pill Tabs</span>
+        <button class="show-code-btn" data-target="code-pill">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-pill" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">Dashboard</button>
+            <button class="tab-btn" role="tab">Analytics</button>
+            <button class="tab-btn" role="tab">Reports</button>
+            <button class="tab-btn" role="tab">Settings</button>
+          </div>
+          <div class="tab-panels" style="margin-top:1rem">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Dashboard</h4>
+                <p>Pill-shaped tab buttons sit inside a rounded container. The active tab gets a white filled background with a subtle shadow — perfect for dashboards and control panels.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Analytics</h4>
+                <p>Track page views, sessions, and conversion rates. Real-time data updated every 30 seconds from your connected data source.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Reports</h4>
+                <p>Download monthly and weekly reports in PDF or CSV format. Automated report scheduling available on the Pro plan.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Settings</h4>
+                <p>Configure notifications, integrations, and team permissions from this panel.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-pill">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="tabs-container tabs-pill"&gt;
+  &lt;div class="tab-list"&gt;
+    &lt;button class="tab-btn active"&gt;Dashboard&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Analytics&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Reports&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panel active"&gt;...Dashboard content...&lt;/div&gt;
+  &lt;div class="tab-panel"&gt;...Analytics content...&lt;/div&gt;
+  &lt;div class="tab-panel"&gt;...Reports content...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         3. Underline Tabs (animated sliding indicator)
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Underline Tabs — Animated Indicator</span>
+        <button class="show-code-btn" data-target="code-underline">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-underline" id="underline-demo" style="width:100%">
+          <div class="tab-list" role="tablist" style="position:relative">
+            <button class="tab-btn active" role="tab">Design</button>
+            <button class="tab-btn" role="tab">Develop</button>
+            <button class="tab-btn" role="tab">Test</button>
+            <button class="tab-btn" role="tab">Deploy</button>
+            <div class="underline-indicator" id="underline-indicator"></div>
+          </div>
+          <div class="tab-panels" style="margin-top:1rem">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Design Phase</h4>
+                <p>The sliding underline transitions smoothly using CSS <code>left</code> and <code>width</code> properties. JavaScript measures each tab button's offset and width on click to reposition the indicator with a cubic-bezier easing.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Development Phase</h4>
+                <p>Set up your local environment, create feature branches, and follow the contribution guidelines before opening a pull request.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Testing Phase</h4>
+                <p>Run unit, integration, and end-to-end tests. Minimum 80% code coverage required before merging to main.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Deployment Phase</h4>
+                <p>CI/CD pipeline automatically deploys to staging on merge. Production releases require manual approval from a lead engineer.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-underline">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- JS measures offsetLeft + offsetWidth of the active .tab-btn,
+     then sets left/width on .underline-indicator --&gt;
+&lt;div class="tabs-container tabs-underline"&gt;
+  &lt;div class="tab-list" style="position:relative"&gt;
+    &lt;button class="tab-btn active"&gt;Design&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Develop&lt;/button&gt;
+    &lt;div class="underline-indicator"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panel active"&gt;...&lt;/div&gt;
+  &lt;div class="tab-panel"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         4. Vertical Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Vertical Tabs</span>
+        <button class="show-code-btn" data-target="code-vertical">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body">
+        <div class="tabs-container tabs-vertical" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">Account</button>
+            <button class="tab-btn" role="tab">Security</button>
+            <button class="tab-btn" role="tab">Billing</button>
+            <button class="tab-btn" role="tab">Notifications</button>
+            <button class="tab-btn" role="tab">API Keys</button>
+          </div>
+          <div class="tab-panels">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Account Settings</h4>
+                <p>Update your profile picture, display name, email address, and timezone. Changes are saved immediately.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Security</h4>
+                <p>Enable two-factor authentication, manage trusted devices, and review recent login activity from this panel.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Billing</h4>
+                <p>Manage your subscription plan, update payment methods, and download past invoices.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Notifications</h4>
+                <p>Control which events trigger email, push, or SMS notifications. Batch digest options available.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>API Keys</h4>
+                <p>Generate, rotate, and revoke API keys for programmatic access. Scoped keys with granular permissions supported.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-vertical">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Flexbox row: .tab-list on left (border-right), .tab-panels on right --&gt;
+&lt;div class="tabs-container tabs-vertical"&gt;
+  &lt;div class="tab-list"&gt;
+    &lt;button class="tab-btn active"&gt;Account&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Security&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panels"&gt;
+    &lt;div class="tab-panel active"&gt;...Account...&lt;/div&gt;
+    &lt;div class="tab-panel"&gt;...Security...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         5. Icon Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Icon Tabs</span>
+        <button class="show-code-btn" data-target="code-icon">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-icon" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Home
+            </button>
+            <button class="tab-btn" role="tab">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Profile
+            </button>
+            <button class="tab-btn" role="tab">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.45-.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              Contact
+            </button>
+            <button class="tab-btn" role="tab">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+              Broadcast
+            </button>
+          </div>
+          <div class="tab-panels" style="margin-top:1rem">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Home</h4>
+                <p>Icons paired with labels make tabs immediately recognizable. SVG icons scale cleanly at any density and inherit the button's current color via <code>stroke="currentColor"</code>.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Profile</h4>
+                <p>Edit your personal information, upload an avatar, and configure your public bio shown to other users.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Contact</h4>
+                <p>Manage contact preferences, blocked numbers, and communication history.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Broadcast</h4>
+                <p>Schedule and send broadcast messages to subscriber segments. Live preview available before sending.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-icon">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Icon + label inside each .tab-btn --&gt;
+&lt;button class="tab-btn active"&gt;
+  &lt;svg ...&gt;&lt;/svg&gt;
+  Home
+&lt;/button&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         6. Scrollable Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Scrollable Tabs</span>
+        <button class="show-code-btn" data-target="code-scroll">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-scrollable" style="width:100%">
+          <div class="tab-list-wrap">
+            <div class="tab-list" role="tablist">
+              <button class="tab-btn active" role="tab">Monday</button>
+              <button class="tab-btn" role="tab">Tuesday</button>
+              <button class="tab-btn" role="tab">Wednesday</button>
+              <button class="tab-btn" role="tab">Thursday</button>
+              <button class="tab-btn" role="tab">Friday</button>
+              <button class="tab-btn" role="tab">Saturday</button>
+              <button class="tab-btn" role="tab">Sunday</button>
+              <button class="tab-btn" role="tab">Week Overview</button>
+              <button class="tab-btn" role="tab">Month View</button>
+              <button class="tab-btn" role="tab">Year Summary</button>
+            </div>
+          </div>
+          <div class="tab-panels" style="margin-top:1rem">
+            <div class="tab-panel active">
+              <div class="panel-content"><h4>Monday</h4><p>Start the week with team standup at 9 AM. Sprint planning follows at 10 AM for two hours.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Tuesday</h4><p>Deep-work blocks scheduled 9–12 AM. Design review at 2 PM with the product team.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Wednesday</h4><p>Engineering sync at 11 AM. Architecture decision record review after lunch.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Thursday</h4><p>Code review sessions. 1:1s with direct reports throughout the afternoon.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Friday</h4><p>Sprint retrospective at 4 PM. Wrap up open PRs and update project board before EOD.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Saturday</h4><p>No scheduled meetings. Optional pair-programming session at noon for interested engineers.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Sunday</h4><p>On-call rotation starts at 6 PM for the week ahead. Check PagerDuty schedule.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Week Overview</h4><p>Total: 3 major milestones, 12 tickets resolved, 94% test coverage maintained.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Month View</h4><p>February summary: 42 PRs merged, 3 feature releases, 0 P0 incidents.</p></div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content"><h4>Year Summary</h4><p>Annual velocity up 18% year-over-year. Infrastructure costs down 12% following migration to edge compute.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-scroll">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Wrap tab-list in overflow-x:auto container, scrollbar hidden --&gt;
+&lt;div class="tab-list-wrap"&gt;  &lt;!-- overflow-x:auto; scrollbar-width:none --&gt;
+  &lt;div class="tab-list"&gt;     &lt;!-- width:max-content --&gt;
+    &lt;button class="tab-btn active"&gt;Monday&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Tuesday&lt;/button&gt;
+    ... (10 tabs)
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         7. Animated Content Tabs
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">7. Animated Content Tabs</span>
+        <button class="show-code-btn" data-target="code-animated">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-animated" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">Introduction</button>
+            <button class="tab-btn" role="tab">Installation</button>
+            <button class="tab-btn" role="tab">Usage</button>
+            <button class="tab-btn" role="tab">Advanced</button>
+          </div>
+          <div class="tab-panels">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Introduction</h4>
+                <p>Tab content fades in with a slight upward translateY motion — a polished micro-animation that adds perceived quality. The transition uses <code>opacity</code> and <code>transform</code> for GPU-accelerated performance. No layout recalculation triggered.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Installation</h4>
+                <p>No package manager needed. Copy the CSS class definitions and the <code>initTabs()</code> function into your project. Works in all modern browsers without polyfills.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Basic Usage</h4>
+                <p>Add <code>.tabs-container</code> and the variant class to a wrapper element. Place <code>.tab-btn</code> elements inside a <code>.tab-list</code> and corresponding <code>.tab-panel</code> elements as siblings or inside a <code>.tab-panels</code> wrapper.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Advanced Configuration</h4>
+                <p>Override CSS custom properties to retheme any variant. The <code>initTabs()</code> function accepts any container element, so you can initialize dynamically injected tab groups at runtime.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-animated">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Content animates via opacity + translateY CSS transition --&gt;
+&lt;!-- .tab-panel default: opacity:0; transform:translateY(8px); height:0 --&gt;
+&lt;!-- .tab-panel.active:  opacity:1; transform:translateY(0);   height:auto --&gt;
+&lt;div class="tabs-container tabs-animated"&gt;
+  &lt;div class="tab-list"&gt;
+    &lt;button class="tab-btn active"&gt;Introduction&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Installation&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panels"&gt;
+    &lt;div class="tab-panel active"&gt;...&lt;/div&gt;
+    &lt;div class="tab-panel"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         8. Card Tabs (folder tabs)
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">8. Card Tabs — Folder Style</span>
+        <button class="show-code-btn" data-target="code-card">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="tabs-container tabs-card" style="width:100%">
+          <div class="tab-list" role="tablist">
+            <button class="tab-btn active" role="tab">Details</button>
+            <button class="tab-btn" role="tab">Activity</button>
+            <button class="tab-btn" role="tab">Files</button>
+            <button class="tab-btn" role="tab">Comments</button>
+          </div>
+          <div class="tab-panels">
+            <div class="tab-panel active">
+              <div class="panel-content">
+                <h4>Project Details</h4>
+                <p>Tabs styled as raised folder tabs — the active tab appears elevated above the content panel border, creating a physical file folder metaphor. The active tab's bottom border matches the panel background to merge visually.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Activity Log</h4>
+                <p>Last edited by Alex Chen — 2 hours ago. Status changed from "In Review" to "Approved" by Jordan Kim — yesterday.</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Attached Files</h4>
+                <p>design-spec-v3.figma (4.2 MB) · updated 3 days ago<br>api-contracts.yaml (18 KB) · updated last week</p>
+              </div>
+            </div>
+            <div class="tab-panel">
+              <div class="panel-content">
+                <h4>Comments (3)</h4>
+                <p>"LGTM — shipping Monday." — Riley Park<br>"Left a few inline suggestions on the Figma file." — Sam Torres</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-card">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Active .tab-btn gets border-bottom-color matching panel background --&gt;
+&lt;!-- so the tab visually "merges" into the content area below --&gt;
+&lt;div class="tabs-container tabs-card"&gt;
+  &lt;div class="tab-list"&gt;
+    &lt;button class="tab-btn active"&gt;Details&lt;/button&gt;
+    &lt;button class="tab-btn"&gt;Activity&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="tab-panels"&gt;  &lt;!-- border on all sides except top --&gt;
+    &lt;div class="tab-panel active"&gt;...&lt;/div&gt;
+    &lt;div class="tab-panel"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ============================================================
+     Tab initialization
+     ============================================================ */
+  function initTabs(container) {
+    const tabs = container.querySelectorAll('.tab-btn');
+    const panels = container.querySelectorAll('.tab-panel');
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panels[i].classList.add('active');
+
+        // Move underline indicator (variant 3 only)
+        const indicator = container.querySelector('.underline-indicator');
+        if (indicator) {
+          indicator.style.left  = tab.offsetLeft + 'px';
+          indicator.style.width = tab.offsetWidth + 'px';
+        }
+      });
+    });
+
+    // Set initial underline indicator position
+    const indicator = container.querySelector('.underline-indicator');
+    if (indicator) {
+      const activeTab = container.querySelector('.tab-btn.active');
+      if (activeTab) {
+        indicator.style.left  = activeTab.offsetLeft + 'px';
+        indicator.style.width = activeTab.offsetWidth + 'px';
+      }
+    }
+  }
+
+  document.querySelectorAll('.tabs-container').forEach(initTabs);
+</script>
+</body>
+</html>
