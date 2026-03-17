@@ -1,5 +1,5 @@
 /* ============================================================
-   Frontend Design Catalog — グローバルスタイル設計書
+   UI比較集 — グローバルスタイル設計書
 
    【色の役割原則】
    色は「見た目の華やかさ」ではなく「機能的な意味」を持たせる。
@@ -31,10 +31,10 @@
 /* ---- CSS変数（ライトモード デフォルト） ---- */
 :root {
   /* ── ブランド / インタラクション色（1色＝1役割） ── */
-  --primary:          #4f46e5; /* インディゴ: ブランド識別 + インタラクション全般 */
-  --primary-hover:    #4338ca; /* ホバー時: primary を10%暗くした値 */
-  --primary-subtle:   rgba(79, 70, 229, 0.08); /* 非常に薄いtint: activeな背景に */
-  --primary-border:   rgba(79, 70, 229, 0.25); /* 薄いボーダー: 選択状態のアウトライン */
+  --primary:          #0ea5e9; /* スカイブルー: ブランド識別 + インタラクション全般 */
+  --primary-hover:    #0284c7; /* ホバー時: primary を少し暗くした値 */
+  --primary-subtle:   rgba(14, 165, 233, 0.1); /* 非常に薄いtint: activeな背景に */
+  --primary-border:   rgba(14, 165, 233, 0.3); /* 薄いボーダー: 選択状態のアウトライン */
 
   /* ── 状態色（それぞれ1つの意味のみ） ── */
   --success:    #16a34a; /* 緑: 成功・完了・有効 */
@@ -95,7 +95,7 @@
   --header-height: 56px;
 
   /* ── 後方互換 (既存コンポーネントが参照するエイリアス) ── */
-  --secondary: #6d28d9; /* primaryと区別が必要な箇所のみ。装飾には使わない */
+  --secondary: #0369a1; /* primaryと区別が必要な箇所のみ。装飾には使わない */
   --shadow-xl: 0 20px 25px rgba(0,0,0,0.08), 0 10px 10px rgba(0,0,0,0.03);
   --dark:  #0f172a;
   --light: #f8fafc;
@@ -113,10 +113,10 @@
   --text-subtle:  #546e8a;
   --text-inverse: #0f172a;
 
-  --primary:       #6366f1; /* ダーク背景では少し明るめにして可読性確保 */
-  --primary-hover: #818cf8;
-  --primary-subtle: rgba(99, 102, 241, 0.12);
-  --primary-border: rgba(99, 102, 241, 0.3);
+  --primary:       #38bdf8; /* ダーク背景では少し明るめにして可読性確保 */
+  --primary-hover: #7dd3fc;
+  --primary-subtle: rgba(56, 189, 248, 0.16);
+  --primary-border: rgba(56, 189, 248, 0.35);
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
   --shadow:    0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
@@ -124,7 +124,7 @@
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.6), 0 4px 6px rgba(0,0,0,0.5);
   --shadow-xl: 0 20px 25px rgba(0,0,0,0.7), 0 10px 10px rgba(0,0,0,0.5);
 
-  --secondary: #818cf8;
+  --secondary: #7dd3fc;
 }
 
 /* ============================================================

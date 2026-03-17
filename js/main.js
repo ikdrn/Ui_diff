@@ -1,5 +1,5 @@
 /* ============================================================
-   Frontend Design Catalog — 共通JavaScript
+   UI比較集 — 共通JavaScript
    全ページで読み込む共通の機能を定義。
    ============================================================ */
 
@@ -33,7 +33,7 @@ function setupCodeSnippets() {
       const target = document.getElementById(btn.dataset.target); // 対象のコードブロック
       if (!target) return;
       const isVisible = target.classList.toggle('visible'); // 表示/非表示切替
-      btn.textContent = isVisible ? '▲ Hide Code' : '▶ Show Code'; // ボタンテキスト変化
+      btn.textContent = isVisible ? '▲ コードを隠す' : '▶ コードを表示'; // ボタンテキスト変化
     });
   });
 
@@ -44,14 +44,14 @@ function setupCodeSnippets() {
       if (!pre) return;
       try {
         await navigator.clipboard.writeText(pre.textContent); // クリップボードにコピー
-        btn.textContent = '✓ Copied!';         // 成功表示
+        btn.textContent = '✓ コピー完了!';         // 成功表示
         btn.classList.add('copied');             // スタイル変化
         setTimeout(() => {
-          btn.textContent = 'Copy';              // 2秒後に元のテキストへ
+          btn.textContent = 'コピー';              // 2秒後に元のテキストへ
           btn.classList.remove('copied');
         }, 2000);
       } catch (e) {
-        btn.textContent = 'Failed'; // コピー失敗時
+        btn.textContent = 'コピー失敗'; // コピー失敗時
       }
     });
   });
@@ -147,8 +147,33 @@ function setupTiltCards() {
   });
 }
 
+/* ---- 共通文言を日本語に統一 ---- */
+function setupJapaneseLocalization() {
+  const textMap = new Map([
+    ['Back to Home', 'ホームへ戻る'],
+    ['Component Variants', 'コンポーネント一覧'],
+    ['Default', '標準'],
+    ['Outline', 'アウトライン'],
+    ['Soft', 'ソフト'],
+    ['Copy', 'コピー'],
+    ['Show Code', 'コードを表示'],
+    ['Hide Code', 'コードを隠す'],
+    ['▶ Show Code', '▶ コードを表示'],
+    ['▲ Hide Code', '▲ コードを隠す']
+  ]);
+
+  document.querySelectorAll('button, a, span, p, h1, h2, h3, h4, h5, h6').forEach(el => {
+    const raw = el.textContent?.trim();
+    if (!raw) return;
+    if (textMap.has(raw)) {
+      el.textContent = textMap.get(raw);
+    }
+  });
+}
+
 /* ---- ページ読み込み時に全機能を初期化 ---- */
 document.addEventListener('DOMContentLoaded', () => {
+  setupJapaneseLocalization(); // 共通文言の日本語化
   setupThemeToggle();        // ダークモード
   setupCodeSnippets();       // コードスニペット
   setupSidebar();            // モバイルサイドバー
