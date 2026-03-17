@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accordions — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Accordions Page — Component-specific styles
+       ============================================================ */
+
+    /* ---- Shared accordion base ---- */
+    .accordion {
+      width: 100%;
+    }
+    .accordion-item {
+      overflow: hidden;
+    }
+    .accordion-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      text-align: left;
+      transition: all var(--transition);
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .accordion-body-inner {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    /* ============================================================
+       1. Basic Accordion — + / - icon
+       ============================================================ */
+    .accordion-basic .accordion-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .accordion-basic .accordion-item:first-child {
+      border-top: 1px solid var(--border);
+    }
+    .accordion-basic .accordion-btn {
+      padding: 1rem 0;
+    }
+    .accordion-basic .accordion-btn:hover {
+      color: var(--primary);
+    }
+    .accordion-basic .accordion-body-inner {
+      padding: 0 0 1rem;
+    }
+    /* Plus / minus icon */
+    .icon-plus-minus {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      line-height: 1;
+    }
+    .accordion-item.open .icon-plus-minus {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .icon-plus-minus::before { content: '+'; }
+    .accordion-item.open .icon-plus-minus::before { content: '−'; }
+
+    /* ============================================================
+       2. Bordered Accordion — full border, rounded corners
+       ============================================================ */
+    .accordion-bordered .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.6rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .accordion-bordered .accordion-item.open {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    .accordion-bordered .accordion-btn {
+      padding: 1rem 1.25rem;
+    }
+    .accordion-bordered .accordion-btn:hover {
+      color: var(--primary);
+    }
+    .accordion-bordered .accordion-body-inner {
+      padding: 0 1.25rem 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.85rem;
+      margin-top: 0;
+    }
+    /* Chevron for bordered */
+    .icon-chevron {
+      flex-shrink: 0;
+      transition: transform 0.28s ease;
+      color: var(--text-muted);
+    }
+    .accordion-item.open .icon-chevron {
+      transform: rotate(180deg);
+      color: var(--primary);
+    }
+
+    /* ============================================================
+       3. Flush Accordion — no outer border, only dividers
+       ============================================================ */
+    .accordion-flush .accordion-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .accordion-flush .accordion-btn {
+      padding: 1rem 0;
+      font-weight: 500;
+    }
+    .accordion-flush .accordion-btn:hover {
+      color: var(--primary);
+    }
+    .accordion-flush .accordion-body-inner {
+      padding: 0 0 1rem;
+    }
+    /* Dash icon for flush */
+    .icon-dash {
+      flex-shrink: 0;
+      width: 18px;
+      height: 2px;
+      background: var(--gray-400);
+      border-radius: 2px;
+      position: relative;
+      transition: background var(--transition);
+    }
+    .icon-dash::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: var(--gray-400);
+      border-radius: 2px;
+      transition: transform 0.25s ease, background var(--transition);
+    }
+    .accordion-item:not(.open) .icon-dash::after {
+      transform: translateY(0) rotate(90deg);
+    }
+    .accordion-item.open .icon-dash,
+    .accordion-item.open .icon-dash::after {
+      background: var(--primary);
+    }
+    .accordion-item.open .icon-dash::after {
+      transform: translateY(0) rotate(0deg);
+    }
+
+    /* ============================================================
+       4. Icon Accordion — chevron rotates 180° when open
+       ============================================================ */
+    .accordion-icon .accordion-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      transition: all var(--transition);
+    }
+    .accordion-icon .accordion-item.open {
+      background: rgba(99, 102, 241, 0.04);
+    }
+    .accordion-icon .accordion-btn {
+      padding: 0.9rem 1.25rem;
+      gap: 0.75rem;
+    }
+    .accordion-icon .accordion-btn:hover { color: var(--primary); }
+    .accordion-icon .accordion-btn-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+    .accordion-icon .btn-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .accordion-icon .accordion-body-inner {
+      padding: 0 1.25rem 1rem 4.1rem;
+    }
+    /* Rotating chevron (reusing .icon-chevron from bordered) */
+
+    /* ============================================================
+       5. Nested Accordion — accordion items containing child accordions
+       ============================================================ */
+    .accordion-nested .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.6rem;
+      overflow: visible; /* allow nested items to show */
+    }
+    .accordion-nested .accordion-btn {
+      padding: 0.9rem 1.25rem;
+      background: var(--surface-2);
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+    .accordion-nested .accordion-item:not(.open) .accordion-btn {
+      border-radius: var(--radius-md);
+    }
+    .accordion-nested .accordion-btn:hover { color: var(--primary); }
+    .accordion-nested .accordion-body-inner {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    /* Child accordion */
+    .accordion-nested .child-accordion .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.4rem;
+      background: var(--surface);
+    }
+    .accordion-nested .child-accordion .accordion-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: none;
+      border-radius: var(--radius);
+    }
+    .accordion-nested .child-accordion .accordion-body-inner {
+      padding: 0 1rem 0.75rem;
+      font-size: 0.85rem;
+      border-top: 1px dashed var(--border);
+      padding-top: 0.5rem;
+      margin-top: 0;
+    }
+
+    /* ============================================================
+       6. FAQ Style Accordion — colorful left border, Q&A layout
+       ============================================================ */
+    .accordion-faq .accordion-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gray-300);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin-bottom: 0.75rem;
+      transition: border-left-color var(--transition), box-shadow var(--transition);
+    }
+    .accordion-faq .accordion-item:nth-child(1) { border-left-color: var(--primary); }
+    .accordion-faq .accordion-item:nth-child(2) { border-left-color: var(--success); }
+    .accordion-faq .accordion-item:nth-child(3) { border-left-color: var(--warning); }
+    .accordion-faq .accordion-item:nth-child(4) { border-left-color: var(--danger); }
+    .accordion-faq .accordion-item:nth-child(5) { border-left-color: var(--secondary); }
+    .accordion-faq .accordion-item:nth-child(6) { border-left-color: var(--info); }
+
+    .accordion-faq .accordion-item.open {
+      box-shadow: var(--shadow-sm);
+    }
+    .accordion-faq .accordion-btn {
+      padding: 1rem 1.25rem;
+      font-size: 0.925rem;
+    }
+    .accordion-faq .accordion-btn:hover { color: var(--primary); }
+    .accordion-faq .faq-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .accordion-faq .accordion-body-inner {
+      padding: 0 1.25rem 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.85rem;
+    }
+    .accordion-faq .faq-answer-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Header
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     Layout
+     ============================================================ -->
+<div class="layout-wrapper">
+
+  <!-- ---- Sidebar ---- -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Navigation</div>
+    <a href="../index.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+
+    <div class="sidebar-section-title" style="margin-top:0.75rem">Components</div>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </nav>
+
+  <!-- ---- Main Content ---- -->
+  <main class="main-content">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Accordions</span>
+    </nav>
+
+    <!-- Page heading -->
+    <h1 class="section-title">Accordions</h1>
+    <p class="section-subtitle">6 accordion variants — JS-powered smooth expand/collapse with <code>max-height</code> transitions. Click any item to toggle.</p>
+
+    <!-- ===========================================================
+         1. Basic Accordion — + / - icon, smooth height transition
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Basic Accordion</span>
+        <button class="show-code-btn" data-target="code-basic-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-basic">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              What is a design system?
+              <span class="icon-plus-minus" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                A design system is a collection of reusable components, guided by clear standards, that can be assembled to build any number of applications. It bridges design and development by providing a shared language for teams to work from.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Why use Vanilla JS instead of a framework?
+              <span class="icon-plus-minus" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Vanilla JS keeps bundle sizes tiny, eliminates framework upgrade churn, and ensures your components work in any environment — including legacy projects, WordPress themes, or email clients that strip JavaScript frameworks.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              How does the height animation work?
+              <span class="icon-plus-minus" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                The <code>max-height</code> property transitions from <code>0</code> to the element's <code>scrollHeight</code> in pixels. CSS cannot animate <code>height: auto</code>, but <code>max-height</code> achieves the same visual result with a cubic-bezier easing for a natural feel.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Is it accessible?
+              <span class="icon-plus-minus" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Yes. Each trigger is a native <code>&lt;button&gt;</code> element, which is keyboard-focusable and screen-reader-announced by default. Add <code>aria-expanded</code> and <code>aria-controls</code> attributes for full ARIA compliance.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-basic-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="accordion accordion-basic"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;
+      Question text
+      &lt;span class="icon-plus-minus"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;Answer text...&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- JS: max-height transitions from 0 → scrollHeight --&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         2. Bordered Accordion
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Bordered Accordion</span>
+        <button class="show-code-btn" data-target="code-bordered-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-bordered">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Getting Started
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Clone the repository, open <code>index.html</code> in your browser, and explore each component category. No build step required — everything runs directly from the file system or any static web server.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Customizing Colors
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                All colors are defined as CSS custom properties in <code>global.css</code> under <code>:root</code>. Override <code>--primary</code>, <code>--secondary</code>, and the surface colors to instantly retheme the entire catalog without touching component markup.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Dark Mode Support
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Toggle the switch in the top-right header to switch between light and dark mode. The preference is persisted to <code>localStorage</code> and restored on every page load via the <code>initTheme()</code> IIFE in <code>main.js</code>.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Browser Compatibility
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                All components target evergreen browsers (Chrome, Firefox, Safari, Edge — last 2 major versions). CSS custom properties and <code>max-height</code> transitions are universally supported. No IE11 support.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-bordered-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Each item: full border + rounded corners.
+     Open item: primary-colored border + subtle focus ring --&gt;
+&lt;div class="accordion accordion-bordered"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;
+      Title
+      &lt;svg class="icon-chevron"&gt;...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;Content...&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         3. Flush Accordion — dividers only, no outer border
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Flush Accordion</span>
+        <button class="show-code-btn" data-target="code-flush-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-flush">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Do you offer a free plan?
+              <span class="icon-dash" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Yes. The free plan includes up to 3 projects, 5 collaborators, and 10 GB storage. No credit card required to sign up.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Can I export my data at any time?
+              <span class="icon-dash" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Absolutely. Export all your data as JSON or CSV from the Account settings page. Exports are generated instantly for datasets under 10,000 rows, or delivered by email for larger ones.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              What payment methods are accepted?
+              <span class="icon-dash" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                We accept all major credit and debit cards (Visa, Mastercard, Amex), PayPal, and wire transfers for annual enterprise contracts.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              How do I cancel my subscription?
+              <span class="icon-dash" aria-hidden="true"></span>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                You can cancel anytime from Billing settings. Your access continues until the end of the current billing cycle. No cancellation fees apply.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-flush-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Flush: border-bottom dividers only — no container border.
+     Icon is a CSS ::after pseudo-element that rotates into a minus. --&gt;
+&lt;div class="accordion accordion-flush"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;
+      Question
+      &lt;span class="icon-dash"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;Answer...&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         4. Icon Accordion — rotating chevron + leading icon
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Icon Accordion — Rotating Chevron</span>
+        <button class="show-code-btn" data-target="code-icon-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-icon">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span class="accordion-btn-inner">
+                <span class="btn-icon" style="background:rgba(99,102,241,0.12)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </span>
+                Components &amp; Architecture
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                The chevron rotates 180° when the item opens — a clear directional signal managed by the <code>.open</code> class toggled on <code>.accordion-item</code>. The CSS <code>transform: rotate(180deg)</code> transition is smooth and GPU-accelerated.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span class="accordion-btn-inner">
+                <span class="btn-icon" style="background:rgba(16,185,129,0.12)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                Performance Optimizations
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                All transitions use <code>opacity</code>, <code>transform</code>, and <code>max-height</code> — properties that can be composited on the GPU. Avoid animating <code>height</code>, <code>top</code>, or <code>margin</code> as these trigger layout recalculations.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span class="accordion-btn-inner">
+                <span class="btn-icon" style="background:rgba(245,158,11,0.12)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </span>
+                Accessibility Notes
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Add <code>aria-expanded="true/false"</code> to the button and <code>aria-controls</code> pointing to the panel's <code>id</code>. Update these attributes in the JavaScript click handler alongside the class toggle.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span class="accordion-btn-inner">
+                <span class="btn-icon" style="background:rgba(139,92,246,0.12)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                </span>
+                Responsive Behavior
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                Accordions are inherently mobile-friendly — vertical stacking replaces horizontal tabs on narrow viewports. Consider pairing accordions with tab components using a media-query breakpoint swap.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-icon-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Chevron rotates 180deg via CSS on .accordion-item.open --&gt;
+&lt;div class="accordion accordion-icon"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;
+      &lt;span class="accordion-btn-inner"&gt;
+        &lt;span class="btn-icon"&gt;&lt;svg ...&gt;&lt;/svg&gt;&lt;/span&gt;
+        Section Title
+      &lt;/span&gt;
+      &lt;svg class="icon-chevron"&gt;...chevron...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;Content...&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         5. Nested Accordion
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Nested Accordion</span>
+        <button class="show-code-btn" data-target="code-nested-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-nested">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Frontend
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <p style="margin-bottom:0.75rem;font-size:0.85rem">Expand a subcategory below:</p>
+                <!-- Child accordion -->
+                <div class="accordion child-accordion">
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      HTML &amp; CSS
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">Semantic markup, CSS Grid, Flexbox, custom properties, and responsive design fundamentals.</div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      JavaScript
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">ES2022+, DOM manipulation, async/await, Fetch API, and module bundling with Vite or esbuild.</div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      Frameworks
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">React, Vue 3, Svelte, and SolidJS — each with their own reactivity model and ecosystem tradeoffs.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              Backend
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <p style="margin-bottom:0.75rem;font-size:0.85rem">Expand a subcategory below:</p>
+                <div class="accordion child-accordion">
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      Node.js &amp; Deno
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">Server-side JavaScript with Express, Hono, Fastify, and edge-native runtimes via Deno Deploy.</div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      Databases
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">PostgreSQL, SQLite, Redis, and vector databases like pgvector for AI-powered search and retrieval.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              DevOps &amp; Cloud
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <div class="accordion child-accordion">
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      CI/CD Pipelines
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">GitHub Actions, GitLab CI, and Buildkite workflows for automated testing, linting, and deployment.</div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <button class="accordion-btn">
+                      Containerization
+                      <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="accordion-body">
+                      <div class="accordion-body-inner">Docker, Kubernetes, and Helm charts for reproducible builds and scalable production workloads.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-nested-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Child accordions live inside .accordion-body-inner.
+     The same initAccordion() function handles all levels. --&gt;
+&lt;div class="accordion accordion-nested"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;Parent Item&lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;
+
+        &lt;!-- Child accordion --&gt;
+        &lt;div class="accordion child-accordion"&gt;
+          &lt;div class="accordion-item"&gt;
+            &lt;button class="accordion-btn"&gt;Child Item&lt;/button&gt;
+            &lt;div class="accordion-body"&gt;
+              &lt;div class="accordion-body-inner"&gt;...&lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ===========================================================
+         6. FAQ Style Accordion
+         =========================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. FAQ Style Accordion</span>
+        <button class="show-code-btn" data-target="code-faq-acc">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="accordion accordion-faq">
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                How long does onboarding take for a new team?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Most teams are fully up and running within one business day. Our onboarding wizard guides you through workspace setup, team invitations, and integrating with your existing tools like Slack, Jira, and GitHub.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                Is my data encrypted at rest and in transit?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. We are SOC 2 Type II certified and undergo annual penetration testing by an independent third party.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                Can I self-host this catalog on my own domain?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Absolutely. Drop the files onto any static hosting provider — Vercel, Netlify, GitHub Pages, or a plain Nginx/Apache server. No server-side runtime required since everything is pure HTML, CSS, and JS.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                Do you offer white-labeling or custom branding?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Yes — all colors, typography, and spacing are controlled via CSS custom properties in a single file. Update the <code>:root</code> variables to match your brand in minutes, not hours.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                What is your SLA for uptime?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Our infrastructure targets 99.9% uptime with automatic failover across three geographic regions. Enterprise plans include a contractual SLA backed by service credits.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-btn">
+              <span>
+                <span class="faq-label">Q</span>
+                How do I report a security vulnerability?
+              </span>
+              <svg class="icon-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="accordion-body-inner">
+                <span class="faq-answer-label">A</span>
+                Please email <strong>security@example.com</strong> with a description and reproduction steps. We follow responsible disclosure and commit to acknowledging all reports within 48 hours.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="code-snippet" id="code-faq-acc">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- Each item has a colorful left border via nth-child CSS selectors.
+     Q/A labels via .faq-label and .faq-answer-label spans. --&gt;
+&lt;div class="accordion accordion-faq"&gt;
+  &lt;div class="accordion-item"&gt;
+    &lt;button class="accordion-btn"&gt;
+      &lt;span&gt;
+        &lt;span class="faq-label"&gt;Q&lt;/span&gt;
+        Question text here
+      &lt;/span&gt;
+      &lt;svg class="icon-chevron"&gt;...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="accordion-body"&gt;
+      &lt;div class="accordion-body-inner"&gt;
+        &lt;span class="faq-answer-label"&gt;A&lt;/span&gt;
+        Answer text here.
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- CSS: left border color per item via nth-child --&gt;
+&lt;style&gt;
+  .accordion-faq .accordion-item:nth-child(1) { border-left-color: var(--primary); }
+  .accordion-faq .accordion-item:nth-child(2) { border-left-color: var(--success); }
+  .accordion-faq .accordion-item:nth-child(3) { border-left-color: var(--warning); }
+&lt;/style&gt;</code></pre>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ============================================================
+     Accordion initialization
+     Handles all .accordion elements on the page, including nested.
+     ============================================================ */
+  document.querySelectorAll('.accordion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+
+      // Close all siblings within the immediate parent .accordion
+      item.closest('.accordion').querySelectorAll('.accordion-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.accordion-body').style.maxHeight = null;
+      });
+
+      // Open clicked item if it was closed
+      if (!isOpen) {
+        item.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+</body>
+</html>
