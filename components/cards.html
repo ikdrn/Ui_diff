@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cards — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Cards — コンポーネント固有スタイル
+
+       設計方針:
+       カードは「情報のまとまり」を表す容器。
+       重要度の順に: 見出し → 説明 → メタ情報 → アクション
+       装飾より情報の流れを優先する。
+       ============================================================ */
+
+    /* ---- カードの基底スタイル ---- */
+    /* overflow:hidden でメディアの角丸クリッピングを保証 */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ---- 1. 基本カード ---- */
+    .card-img {
+      width: 100%; height: 160px;
+      object-fit: cover; /* アスペクト比を保ちつつ領域を埋める */
+      display: block;
+      background: var(--surface-2); /* 画像なし時のフォールバック */
+    }
+    /* SVGプレースホルダー（画像の代替表示） */
+    .card-img-placeholder {
+      width: 100%; height: 160px;
+      background: linear-gradient(135deg, var(--surface-2), var(--border));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-subtle);
+      font-size: 2.5rem;
+    }
+    .card-body {
+      padding: 1.25rem;
+    }
+    .card-category {
+      /* カテゴリラベル: 本文より小さく・薄くして情報階層を明確に */
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .card-footer {
+      /* カードフッター: 上ボーダーで本文と区切り */
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ---- 2. プロフィールカード ---- */
+    .profile-card {
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      background: var(--primary-subtle);
+      border: 3px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .profile-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .profile-role {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .profile-stat {
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+    }
+    .profile-stat + .profile-stat {
+      border-left: 1px solid var(--border);
+    }
+    .profile-stat-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+    .profile-stat-label {
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+    }
+
+    /* ---- 3. Stat / KPIカード ---- */
+    .stat-card {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .stat-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .stat-card-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .stat-card-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius);
+      background: var(--primary-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .stat-card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-card-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    /* トレンド色: 意味のある色のみ使う */
+    .trend-up   { color: var(--success); } /* 増加 = 成功色 */
+    .trend-down { color: var(--danger); }  /* 減少 = 危険色 */
+
+    /* ---- 4. 料金プランカード ---- */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      width: 100%;
+    }
+    @media (max-width: 640px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+    .pricing-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--surface);
+    }
+    /* 推奨プランは border と背景で強調 */
+    .pricing-card.featured {
+      border-color: var(--primary-border);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+    .pricing-card-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-card.featured .pricing-card-header {
+      background: var(--primary-subtle);
+    }
+    .pricing-badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      margin-bottom: 0.5rem;
+    }
+    .pricing-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .pricing-price {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+    .pricing-period {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .pricing-card-body {
+      padding: 1.25rem;
+    }
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 1.25rem;
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0.3rem 0;
+    }
+    .pricing-features li svg { flex-shrink: 0; color: var(--success); }
+    .pricing-features li.disabled { color: var(--text-subtle); }
+    .pricing-features li.disabled svg { color: var(--gray-400); }
+
+    /* ---- 5. 横並びカード ---- */
+    .horizontal-card {
+      display: flex;
+      overflow: hidden;
+    }
+    .horizontal-card-img {
+      width: 160px;
+      flex-shrink: 0;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text-subtle);
+    }
+    .horizontal-card-body {
+      padding: 1.25rem;
+      flex: 1;
+      min-width: 0; /* テキストの切り捨てを有効にするため */
+    }
+
+    /* ---- 6. 記事カード ---- */
+    .article-card .card-body {
+      padding: 1rem 1.25rem;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      margin-top: 0.75rem;
+    }
+    .article-author-avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    /* ---- 7. スケルトンカード（ローディング中）---- */
+    /* shimmerアニメーション: ローディング中の視覚フィードバック */
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .skeleton {
+      /* グラデーションが左から右へ動いてシマー効果を作る */
+      background: linear-gradient(
+        90deg,
+        var(--surface-2) 25%,
+        var(--border)    50%,
+        var(--surface-2) 75%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--radius-sm);
+    }
+    .skeleton-card {
+      padding: 1.25rem;
+    }
+    .skeleton-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+    }
+    .skeleton-line { height: 12px; margin-bottom: 0.5rem; }
+    .skeleton-line.wide  { width: 75%; }
+    .skeleton-line.medium{ width: 55%; }
+    .skeleton-line.narrow{ width: 35%; }
+    .skeleton-block { height: 100px; margin-bottom: 1rem; border-radius: var(--radius); }
+
+    /* ---- 8. フリップカード ---- */
+    .flip-card-wrapper {
+      width: 220px; height: 260px;
+      perspective: 800px; /* 3D変形の消失点距離 */
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%; height: 100%;
+      transition: transform 0.5s ease;
+      transform-style: preserve-3d; /* 子要素も3D空間内に配置 */
+    }
+    .flip-card-wrapper:hover .flip-card-inner {
+      transform: rotateY(180deg); /* ホバーで裏面へ回転 */
+    }
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      backface-visibility: hidden; /* 裏面は非表示にする */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      background: var(--surface);
+    }
+    .flip-card-back {
+      transform: rotateY(180deg); /* 初期状態は180度回転して非表示 */
+      background: var(--primary-subtle);
+      border-color: var(--primary-border);
+    }
+
+    /* ---- 汎用ボタン（カード内のCTA）---- */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem; border-radius: var(--radius);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary); color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface-2); }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+    .btn-block { width: 100%; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
+    <span>Design Catalog</span>
+  </a>
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="メニューを開く">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">☀</span>
+    <label class="theme-toggle" title="ダークモード切替">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">☾</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="layout-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+    <a href="../index.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+    <a href="buttons.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>Buttons</a>
+    <a href="cards.html" class="sidebar-link active"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>Cards</a>
+    <a href="forms.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>Forms</a>
+    <a href="navbars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>Navbars</a>
+    <a href="heroes.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>Heroes</a>
+    <a href="footers.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>Footers</a>
+    <a href="modals.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>Modals</a>
+    <a href="tables.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>Tables</a>
+    <a href="badges.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>Badges</a>
+    <a href="alerts.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Alerts</a>
+    <a href="tabs.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>Tabs</a>
+    <a href="accordions.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>Accordions</a>
+    <a href="breadcrumbs.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>Breadcrumbs</a>
+    <a href="pagination.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>Pagination</a>
+    <a href="tooltips.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Tooltips</a>
+    <a href="dropdowns.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>Dropdowns</a>
+    <a href="sidebars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>Sidebars</a>
+    <a href="loaders.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loaders</a>
+    <a href="toggles.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>Toggles</a>
+    <a href="avatars.html" class="sidebar-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Avatars</a>
+  </aside>
+
+  <main class="main-content">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Cards</span>
+    </nav>
+
+    <div class="page-title-block">
+      <h1>Cards</h1>
+      <p>情報のまとまりを表すコンテナ。プロフィール・KPI・料金比較など用途に応じた8種類のバリエーション。</p>
+    </div>
+
+    <!-- 1. 基本カード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">1. 基本カード</span>
+        </div>
+        <button class="show-code-btn" data-target="code-basic">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="align-items: flex-start;">
+        <div class="card" style="width: 260px;">
+          <div class="card-img-placeholder">🌄</div>
+          <div class="card-body">
+            <div class="card-category">デザイン</div>
+            <div class="card-title">UIデザインの基本原則</div>
+            <div class="card-desc">視覚的なヒエラルキーを正しく設定することで、ユーザーは何が重要かを直感的に把握できる。</div>
+            <button class="btn btn-primary btn-sm">続きを読む →</button>
+          </div>
+        </div>
+        <!-- 長いタイトルのエッジケース -->
+        <div class="card" style="width: 260px;">
+          <div class="card-img-placeholder">📊</div>
+          <div class="card-body">
+            <div class="card-category">分析</div>
+            <div class="card-title">とても長いカードタイトルが入力された場合の折り返し表示の確認用テキスト</div>
+            <div class="card-desc">説明文も長い場合のレイアウト確認。実際のプロダクトでは様々な長さのコンテンツが入力される。</div>
+            <button class="btn btn-ghost btn-sm">詳細を見る</button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-basic">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="card"&gt;
+  &lt;img class="card-img" src="image.jpg" alt="..."&gt;
+  &lt;div class="card-body"&gt;
+    &lt;div class="card-category"&gt;カテゴリ&lt;/div&gt;
+    &lt;div class="card-title"&gt;タイトル&lt;/div&gt;
+    &lt;div class="card-desc"&gt;説明文&lt;/div&gt;
+    &lt;button class="btn btn-primary btn-sm"&gt;アクション&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 2. プロフィールカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. プロフィールカード</span>
+        <button class="show-code-btn" data-target="code-profile">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap;">
+        <div class="card" style="width: 240px;">
+          <div class="profile-card">
+            <div class="profile-avatar">KT</div>
+            <div class="profile-name">木村 拓也</div>
+            <div class="profile-role">UIデザイナー · フリーランス</div>
+            <div class="profile-stats">
+              <div class="profile-stat">
+                <span class="profile-stat-val">142</span>
+                <span class="profile-stat-label">投稿</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat-val">2.4k</span>
+                <span class="profile-stat-label">フォロワー</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat-val">89</span>
+                <span class="profile-stat-label">フォロー中</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm btn-block">フォローする</button>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-profile">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="card"&gt;
+  &lt;div class="profile-card"&gt;
+    &lt;div class="profile-avatar"&gt;KT&lt;/div&gt;
+    &lt;div class="profile-name"&gt;木村 拓也&lt;/div&gt;
+    &lt;div class="profile-role"&gt;UIデザイナー&lt;/div&gt;
+    &lt;div class="profile-stats"&gt;
+      &lt;div class="profile-stat"&gt;
+        &lt;span class="profile-stat-val"&gt;142&lt;/span&gt;
+        &lt;span class="profile-stat-label"&gt;投稿&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="btn btn-primary btn-sm btn-block"&gt;フォロー&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 3. Stat / KPIカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">3. Stat / KPIカード</span>
+          <div class="demo-block-when" style="font-size:0.78rem;color:var(--text-subtle);margin-top:0.15rem;">
+            ダッシュボードのKPI表示に使う。トレンドは成功色(↑)・危険色(↓)のみで意味を持たせる。
+          </div>
+        </div>
+        <button class="show-code-btn" data-target="code-stat">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div class="card" style="width: 200px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">月間売上</span>
+              <div class="stat-card-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">¥2.4M</div>
+            <div class="stat-card-trend trend-up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              +12.5% 先月比
+            </div>
+          </div>
+        </div>
+        <div class="card" style="width: 200px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">直帰率</span>
+              <div class="stat-card-icon" style="background:rgba(220,38,38,0.08);color:var(--danger);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">68.3%</div>
+            <div class="stat-card-trend trend-down">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 9 12 15 6 9"/></svg>
+              -3.2% 先週比
+            </div>
+          </div>
+        </div>
+        <div class="card" style="width: 200px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">アクティブユーザー</span>
+              <div class="stat-card-icon" style="background:rgba(22,163,74,0.08);color:var(--success);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">1,284</div>
+            <div class="stat-card-trend trend-up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              +8.1% 今週
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-stat">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="card"&gt;
+  &lt;div class="stat-card"&gt;
+    &lt;div class="stat-card-header"&gt;
+      &lt;span class="stat-card-label"&gt;月間売上&lt;/span&gt;
+      &lt;div class="stat-card-icon"&gt;...icon...&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="stat-card-value"&gt;¥2.4M&lt;/div&gt;
+    &lt;div class="stat-card-trend trend-up"&gt;↑ +12.5%&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 4. 料金プランカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. 料金プランカード</span>
+        <button class="show-code-btn" data-target="code-pricing">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column surface" style="padding: 1.5rem;">
+        <div class="pricing-grid">
+          <!-- Basic -->
+          <div class="pricing-card">
+            <div class="pricing-card-header">
+              <div class="pricing-name">Basic</div>
+              <div><span class="pricing-price">無料</span></div>
+            </div>
+            <div class="pricing-card-body">
+              <ul class="pricing-features">
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>プロジェクト 3件</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>ストレージ 1GB</li>
+                <li class="disabled"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>チームメンバー</li>
+                <li class="disabled"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>優先サポート</li>
+              </ul>
+              <button class="btn btn-ghost btn-sm btn-block">無料で始める</button>
+            </div>
+          </div>
+          <!-- Pro（推奨） -->
+          <div class="pricing-card featured">
+            <div class="pricing-card-header">
+              <div class="pricing-badge">おすすめ</div>
+              <div class="pricing-name">Pro</div>
+              <div><span class="pricing-price">¥1,980</span><span class="pricing-period"> /月</span></div>
+            </div>
+            <div class="pricing-card-body">
+              <ul class="pricing-features">
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>プロジェクト 無制限</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>ストレージ 50GB</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>チームメンバー 5名</li>
+                <li class="disabled"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>優先サポート</li>
+              </ul>
+              <button class="btn btn-primary btn-sm btn-block">Proを始める</button>
+            </div>
+          </div>
+          <!-- Enterprise -->
+          <div class="pricing-card">
+            <div class="pricing-card-header">
+              <div class="pricing-name">Enterprise</div>
+              <div><span class="pricing-price">応相談</span></div>
+            </div>
+            <div class="pricing-card-body">
+              <ul class="pricing-features">
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>全機能利用可能</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>ストレージ 無制限</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>メンバー 無制限</li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>24時間優先サポート</li>
+              </ul>
+              <button class="btn btn-ghost btn-sm btn-block">お問い合わせ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-pricing">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- 推奨プランに .featured を付ける --&gt;
+&lt;div class="pricing-card featured"&gt;
+  &lt;div class="pricing-card-header"&gt;
+    &lt;div class="pricing-badge"&gt;おすすめ&lt;/div&gt;
+    &lt;div class="pricing-name"&gt;Pro&lt;/div&gt;
+    &lt;div&gt;&lt;span class="pricing-price"&gt;¥1,980&lt;/span&gt;&lt;span class="pricing-period"&gt; /月&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="pricing-card-body"&gt;
+    &lt;ul class="pricing-features"&gt;
+      &lt;li&gt;...&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;button class="btn btn-primary btn-sm btn-block"&gt;始める&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 5. 横並びカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. 横並びカード</span>
+        <button class="show-code-btn" data-target="code-horizontal">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body column">
+        <div class="card horizontal-card" style="max-width: 480px;">
+          <div class="horizontal-card-img">🖼️</div>
+          <div class="horizontal-card-body">
+            <div class="card-category">チュートリアル</div>
+            <div class="card-title">レスポンシブデザインの実践</div>
+            <div class="card-desc" style="font-size:0.8rem;">Flexboxとグリッドを使った実践的なレイアウト手法を解説します。</div>
+            <div style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem;">2024年3月 · 8分で読める</div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-horizontal">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="card horizontal-card"&gt;
+  &lt;div class="horizontal-card-img"&gt;...&lt;/div&gt;
+  &lt;div class="horizontal-card-body"&gt;
+    &lt;div class="card-title"&gt;タイトル&lt;/div&gt;
+    &lt;div class="card-desc"&gt;説明文&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 6. スケルトンカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">6. スケルトンカード（ローディング中）</span>
+          <div style="font-size:0.78rem;color:var(--text-subtle);margin-top:0.15rem;">
+            データ取得中はスケルトンを表示。レイアウトシフトを防ぎ、何かが来ることを示す。
+          </div>
+        </div>
+        <button class="show-code-btn" data-target="code-skeleton">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="align-items: flex-start; flex-wrap: wrap;">
+        <div class="card" style="width: 240px;">
+          <div class="skeleton skeleton-block" style="border-radius: 0;"></div>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-line wide"></div>
+            <div class="skeleton skeleton-line medium" style="margin-top:0.75rem;"></div>
+            <div class="skeleton skeleton-line narrow"></div>
+            <div class="skeleton skeleton-line" style="width:90%;margin-top:0.75rem;height:8px;"></div>
+          </div>
+        </div>
+        <div class="card" style="width: 240px;">
+          <div class="skeleton-card">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+              <div class="skeleton skeleton-avatar"></div>
+              <div style="flex:1;">
+                <div class="skeleton skeleton-line medium"></div>
+                <div class="skeleton skeleton-line narrow" style="margin-top:0.4rem;"></div>
+              </div>
+            </div>
+            <div class="skeleton skeleton-line wide"></div>
+            <div class="skeleton skeleton-line medium" style="margin-top:0.4rem;"></div>
+            <div class="skeleton skeleton-line" style="width:85%;margin-top:0.4rem;height:8px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-skeleton">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* CSS */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 4px;
+}
+
+&lt;!-- HTML --&gt;
+&lt;div class="card"&gt;
+  &lt;div class="skeleton" style="height:160px;"&gt;&lt;/div&gt;
+  &lt;div style="padding:1rem;"&gt;
+    &lt;div class="skeleton" style="height:12px;width:75%;margin-bottom:8px;"&gt;&lt;/div&gt;
+    &lt;div class="skeleton" style="height:12px;width:55%;"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 7. フリップカード -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <div>
+          <span class="demo-block-title">7. フリップカード</span>
+          <div style="font-size:0.78rem;color:var(--text-subtle);margin-top:0.15rem;">
+            ホバーで裏面が表示される。表: 概要 / 裏: 詳細・アクション という使い方が典型。
+          </div>
+        </div>
+        <button class="show-code-btn" data-target="code-flip">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="padding: 2rem 1.5rem;">
+        <div class="flip-card-wrapper">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div style="font-size:2.5rem;margin-bottom:1rem;">📐</div>
+              <div style="font-weight:700;font-size:1rem;color:var(--text);">デザイン原則</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;">ホバーで詳細を見る</div>
+            </div>
+            <div class="flip-card-back">
+              <div style="font-weight:700;font-size:0.95rem;color:var(--primary);margin-bottom:0.75rem;">コア原則</div>
+              <ul style="list-style:none;text-align:left;font-size:0.82rem;color:var(--text-muted);">
+                <li style="padding:0.25rem 0;">✦ 近接性の法則</li>
+                <li style="padding:0.25rem 0;">✦ 視線の流れ</li>
+                <li style="padding:0.25rem 0;">✦ コントラスト</li>
+                <li style="padding:0.25rem 0;">✦ 反復と整合性</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-flip">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* CSS */
+.flip-card-wrapper { perspective: 800px; }
+.flip-card-inner {
+  position: relative;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+.flip-card-wrapper:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front,
+.flip-card-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+}
+.flip-card-back { transform: rotateY(180deg); }
+
+&lt;!-- HTML --&gt;
+&lt;div class="flip-card-wrapper" style="width:220px;height:260px;"&gt;
+  &lt;div class="flip-card-inner"&gt;
+    &lt;div class="flip-card-front"&gt;表面&lt;/div&gt;
+    &lt;div class="flip-card-back"&gt;裏面&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

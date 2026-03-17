@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebars — Frontend Design Catalog</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    /* ============================================================
+       Sidebars page — コンポーネント固有スタイル
+       サイドバーはページの側面に固定されるナビゲーションパネル。
+       デモ内では position:relative でコンテナに収める。
+       ============================================================ */
+
+    /* ---- ページタイトルブロック ---- */
+    .page-title-block {
+      margin-bottom: 2rem;
+    }
+    .page-title-block h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .page-title-block p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* ---- デモサイドバー基底 ---- */
+    /* デモ内では height:350px で固定し、実際のページサイドバーと独立させる */
+    .demo-sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      height: 350px;
+      overflow-y: auto;
+      border-radius: var(--radius-md);
+      padding: 1rem 0;
+      flex-shrink: 0;
+      transition: width var(--transition-slow); /* 折りたたみアニメーション */
+    }
+
+    /* ---- サイドバーリンク ---- */
+    /* border-left で「現在地」を示す: 幅を常に確保しておく */
+    .demo-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      transition: all var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .demo-sidebar-link:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    /* アクティブ: primary のボーダー + 薄いtint = 「今ここ」を示す */
+    .demo-sidebar-link.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      border-left-color: var(--primary);
+      font-weight: 600;
+    }
+    .demo-sidebar-link svg {
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .demo-sidebar-link.active svg {
+      opacity: 1;
+    }
+
+    /* ---- サイドバーセクションタイトル ---- */
+    .demo-sidebar-section {
+      padding: 0.75rem 1rem 0.3rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-subtle);
+    }
+
+    /* ---- 折りたたみサイドバー ---- */
+    /* collapsed 状態: width を 56px に縮小 */
+    .demo-sidebar.collapsed {
+      width: 56px;
+    }
+    /* collapsed 時: ラベルテキストを非表示 */
+    .demo-sidebar.collapsed .sidebar-label {
+      display: none;
+    }
+    /* collapsed 時: リンクを中央揃えに */
+    .demo-sidebar.collapsed .demo-sidebar-link {
+      justify-content: center;
+      padding: 0.45rem;
+    }
+    /* collapsed 時: セクションタイトル非表示 */
+    .demo-sidebar.collapsed .demo-sidebar-section {
+      display: none;
+    }
+    /* collapsed 時: active ボーダーを下に変える */
+    .demo-sidebar.collapsed .demo-sidebar-link.active {
+      border-left-color: transparent;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    /* 折りたたみトグルボタン */
+    .sidebar-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      cursor: pointer;
+      color: var(--text-muted);
+      margin: 0.5rem auto 0.5rem 1rem;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .demo-sidebar.collapsed .sidebar-toggle-btn {
+      margin: 0.5rem auto;
+    }
+    .sidebar-toggle-btn:hover {
+      background: var(--surface);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .sidebar-toggle-icon {
+      transition: transform var(--transition-slow);
+    }
+    .demo-sidebar.collapsed .sidebar-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* ---- ユーザープロファイル付きサイドバー ---- */
+    .sidebar-user-card {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .sidebar-user-info {
+      flex: 1;
+      min-width: 0; /* flexコンテナ内でテキストをoverflow処理させる */
+    }
+    .sidebar-user-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-user-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-user-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success); /* 状態色: 接続中 = success */
+      flex-shrink: 0;
+    }
+
+    /* ---- ネストしたサブメニュー ---- */
+    .sidebar-sub-list {
+      list-style: none;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height var(--transition-slow);
+    }
+    .sidebar-sub-list.open {
+      max-height: 300px; /* 十分な最大高さ */
+    }
+    .sidebar-sub-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.38rem 1rem 0.38rem 2.5rem; /* 左インデントでネストを表現 */
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition);
+      border-left: 2px solid transparent;
+    }
+    .sidebar-sub-link:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .sidebar-sub-link.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    /* ネスト展開の矢印アイコン */
+    .sidebar-expand-arrow {
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: transform var(--transition);
+      color: var(--text-subtle);
+    }
+    .sidebar-expand-btn.open .sidebar-expand-arrow {
+      transform: rotate(90deg); /* 展開時に下向き矢印 */
+    }
+    .sidebar-expand-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      transition: all var(--transition);
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-expand-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .sidebar-expand-btn.open {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    /* ---- ミニサイドバー: アイコンのみ + ツールチップ ---- */
+    .mini-sidebar {
+      width: 56px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      height: 350px;
+      overflow-y: auto;
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    /* ミニサイドバーのアイコンボタン */
+    .mini-sidebar-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .mini-sidebar-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .mini-sidebar-btn.active {
+      background: var(--primary-subtle); /* active: primary tint */
+      color: var(--primary);
+    }
+    /* ツールチップ: ホバーで右側にラベルを表示 */
+    .mini-sidebar-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 8px); /* アイコンの右側 */
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--gray-900);
+      color: #fff;
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--radius);
+      font-size: 0.78rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      z-index: 50;
+    }
+    .mini-sidebar-btn:hover::after {
+      opacity: 1;
+    }
+    .mini-sidebar-divider {
+      width: 28px;
+      height: 1px;
+      background: var(--border);
+      margin: 0.35rem 0;
+    }
+
+    /* ---- 右サイドバー / ドロワー ---- */
+    /* デモコンテナ: overflow:hidden で右から見切れる演出 */
+    .demo-drawer-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      height: 380px;
+      background: var(--bg);
+    }
+    /* ドロワーのオーバーレイ */
+    .demo-drawer-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition-slow), visibility var(--transition-slow);
+    }
+    .demo-drawer-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    /* 右ドロワー: 初期は画面外(右) → open で translateX(0) */
+    .demo-right-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 260px;
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      z-index: 20;
+      transform: translateX(100%); /* 初期: 右に隠す */
+      transition: transform var(--transition-slow);
+      overflow-y: auto;
+      padding: 1.25rem 0;
+    }
+    .demo-right-drawer.open {
+      transform: translateX(0); /* スライドイン */
+    }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .drawer-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .drawer-close-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .drawer-close-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    /* デモのメインコンテンツ部分 */
+    .demo-drawer-main {
+      padding: 1.5rem;
+      height: 100%;
+    }
+    .drawer-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      background: var(--primary); /* 主要アクション: primary */
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+    .drawer-open-btn:hover { opacity: 0.88; }
+
+    /* ---- デモコンテナのレイアウト ---- */
+    .sidebar-demo-container {
+      display: flex;
+      gap: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    /* サイドバー横のコンテンツエリア */
+    .sidebar-demo-content {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      min-height: 350px;
+    }
+
+    /* ---- デモブロックボディをflex-startに ---- */
+    .demo-block-body.sidebar-demo {
+      padding: 0;
+      display: block;
+      background: var(--bg);
+    }
+
+    /* デモヒント文 */
+    .demo-hint {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      padding: 0.75rem 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     グローバルヘッダー
+     ============================================================ -->
+<header class="global-header">
+  <a href="../index.html" class="header-logo">
+    <div class="header-logo-icon">✦</div>
+    <span>Frontend Design Catalog</span>
+  </a>
+
+  <div class="header-right">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="header-theme-label">☀️</span>
+    <label class="theme-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="theme-toggle">
+      <div class="theme-toggle-track"></div>
+      <div class="theme-toggle-thumb"></div>
+    </label>
+    <span class="header-theme-label">🌙</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="layout-wrapper">
+
+  <!-- ============================================================
+       左サイドバー (ページナビ)
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Components</div>
+
+    <a href="../index.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="buttons.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
+      Buttons
+    </a>
+    <a href="cards.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/></svg>
+      Cards
+    </a>
+    <a href="forms.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="13" y2="14"/></svg>
+      Forms
+    </a>
+    <a href="navbars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Navbars
+    </a>
+    <a href="heroes.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 12h10M12 7v10"/></svg>
+      Heroes
+    </a>
+    <a href="footers.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+      Footers
+    </a>
+    <a href="modals.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="12" y2="13"/></svg>
+      Modals
+    </a>
+    <a href="tables.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      Tables
+    </a>
+    <a href="badges.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+      Badges
+    </a>
+    <a href="alerts.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+    </a>
+    <a href="tabs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="8" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="14" y2="9"/></svg>
+      Tabs
+    </a>
+    <a href="accordions.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="16" width="20" height="5" rx="1"/></svg>
+      Accordions
+    </a>
+    <a href="breadcrumbs.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      Breadcrumbs
+    </a>
+    <a href="pagination.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="4" height="8" rx="1"/><rect x="7" y="8" width="4" height="8" rx="1"/><rect x="13" y="8" width="4" height="8" rx="1"/><rect x="19" y="8" width="4" height="8" rx="1"/></svg>
+      Pagination
+    </a>
+    <a href="tooltips.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Tooltips
+    </a>
+    <a href="dropdowns.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Dropdowns
+    </a>
+    <a href="sidebars.html" class="sidebar-link active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+      Sidebars
+    </a>
+    <a href="loaders.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Loaders
+    </a>
+    <a href="toggles.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor"/></svg>
+      Toggles
+    </a>
+    <a href="avatars.html" class="sidebar-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Avatars
+    </a>
+  </aside>
+
+  <!-- ============================================================
+       メインコンテンツ
+       ============================================================ -->
+  <main class="main-content">
+
+    <!-- パンくずリスト -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current">Sidebars</span>
+    </nav>
+
+    <!-- ページタイトル -->
+    <div class="page-title-block">
+      <h1>Sidebars</h1>
+      <p>Navigation panels anchored to the page edge. Six variants — vertical nav, collapsible, user profile, nested menus, mini icon-only, and right drawer.</p>
+    </div>
+
+    <!-- ======================================================
+         1. 縦ナビサイドバー: セクション + リンクの標準形
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">1. Vertical Nav Sidebar</span>
+        <button class="show-code-btn" data-target="code-vertical">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body sidebar-demo">
+        <div class="sidebar-demo-container">
+          <nav class="demo-sidebar" aria-label="Vertical navigation demo">
+            <div class="demo-sidebar-section">Main</div>
+            <a class="demo-sidebar-link active" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span class="sidebar-label">Dashboard</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="sidebar-label">Team</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span class="sidebar-label">Projects</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span class="sidebar-label">Messages</span>
+            </a>
+            <div class="demo-sidebar-section">Content</div>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="sidebar-label">Documents</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="sidebar-label">Media</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              <span class="sidebar-label">Files</span>
+            </a>
+            <div class="demo-sidebar-section">Settings</div>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span class="sidebar-label">Settings</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              <span class="sidebar-label">Logout</span>
+            </a>
+          </nav>
+          <div class="sidebar-demo-content">
+            <p style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">Dashboard</p>
+            <p>Main content area. The sidebar handles navigation to different sections.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-vertical">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;nav class="demo-sidebar"&gt;
+  &lt;div class="demo-sidebar-section"&gt;Main&lt;/div&gt;
+  &lt;a class="demo-sidebar-link active" href="#"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+    &lt;span class="sidebar-label"&gt;Dashboard&lt;/span&gt;
+  &lt;/a&gt;
+  &lt;a class="demo-sidebar-link" href="#"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+    &lt;span class="sidebar-label"&gt;Team&lt;/span&gt;
+  &lt;/a&gt;
+&lt;/nav&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         2. 折りたたみサイドバー: アイコンのみのミニモード
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">2. Collapsible Sidebar</span>
+        <button class="show-code-btn" data-target="code-collapsible">▶ Show Code</button>
+      </div>
+      <div class="demo-hint">Click the arrow button inside the sidebar to collapse/expand it.</div>
+      <div class="demo-block-body sidebar-demo">
+        <div class="sidebar-demo-container">
+          <nav class="demo-sidebar" id="collapsible-sidebar" aria-label="Collapsible sidebar demo">
+            <!-- トグルボタン: 折りたたみ操作 -->
+            <button class="sidebar-toggle-btn" id="sidebar-collapse-btn" aria-label="Toggle sidebar" title="Collapse sidebar">
+              <svg class="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <a class="demo-sidebar-link active" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span class="sidebar-label">Dashboard</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span class="sidebar-label">Users</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span class="sidebar-label">Projects</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+              <span class="sidebar-label">Reports</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span class="sidebar-label">Settings</span>
+            </a>
+          </nav>
+          <div class="sidebar-demo-content">
+            <p style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">Dashboard</p>
+            <p>The sidebar collapses to icon-only mode to give more room to content.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-collapsible">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* CSS */
+.demo-sidebar.collapsed { width: 56px; }
+.demo-sidebar.collapsed .sidebar-label { display: none; }
+.demo-sidebar.collapsed .demo-sidebar-link {
+  justify-content: center; padding: 0.45rem;
+}
+
+/* JS */
+document.getElementById('toggle-btn').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         3. ユーザープロファイル付きサイドバー
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">3. Sidebar with User Profile</span>
+        <button class="show-code-btn" data-target="code-profile">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body sidebar-demo">
+        <div class="sidebar-demo-container">
+          <nav class="demo-sidebar" aria-label="Sidebar with user profile">
+            <!-- ユーザーカード: アバター + 名前 + ロール -->
+            <div class="sidebar-user-card">
+              <div style="display:flex;align-items:center;gap:0.65rem;margin-bottom:0.5rem;">
+                <div class="sidebar-user-avatar">A</div>
+                <div class="sidebar-user-info">
+                  <!-- 長いユーザー名のエッジケース: text-overflow:ellipsis で処理 -->
+                  <div class="sidebar-user-name">Alice Johnson</div>
+                  <div class="sidebar-user-role">Product Designer</div>
+                </div>
+                <div class="sidebar-user-status" title="Online"></div>
+              </div>
+              <!-- ワークスペース名 -->
+              <div style="display:flex;align-items:center;gap:0.4rem;padding:0.35rem 0.6rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span style="font-size:0.75rem;font-weight:500;color:var(--text);flex:1;">Design Team</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <a class="demo-sidebar-link active" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span class="sidebar-label">Home</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="sidebar-label">My Team</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="sidebar-label">My Work</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <span class="sidebar-label">Notifications</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span class="sidebar-label">Settings</span>
+            </a>
+          </nav>
+          <div class="sidebar-demo-content">
+            <p style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">Home</p>
+            <p>User card at top shows avatar, name, role, and online status.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-profile">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;div class="sidebar-user-card"&gt;
+  &lt;div style="display:flex;align-items:center;gap:0.65rem;"&gt;
+    &lt;div class="sidebar-user-avatar"&gt;A&lt;/div&gt;
+    &lt;div class="sidebar-user-info"&gt;
+      &lt;div class="sidebar-user-name"&gt;Alice Johnson&lt;/div&gt;
+      &lt;div class="sidebar-user-role"&gt;Product Designer&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="sidebar-user-status"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         4. ネストしたアイテムのサイドバー: 展開可能なサブメニュー
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">4. Sidebar with Nested Items</span>
+        <button class="show-code-btn" data-target="code-nested">▶ Show Code</button>
+      </div>
+      <div class="demo-hint">Click items with arrows to expand sub-menus.</div>
+      <div class="demo-block-body sidebar-demo">
+        <div class="sidebar-demo-container">
+          <nav class="demo-sidebar" aria-label="Sidebar with nested items">
+            <div class="demo-sidebar-section">Navigation</div>
+            <a class="demo-sidebar-link active" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span class="sidebar-label">Overview</span>
+            </a>
+            <!-- 展開ボタン: クリックでサブメニュー表示 -->
+            <button class="sidebar-expand-btn" id="expand-projects" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span class="sidebar-label">Projects</span>
+              <svg class="sidebar-expand-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <!-- プロジェクトのサブメニュー -->
+            <ul class="sidebar-sub-list" id="sub-projects" role="list">
+              <li><a class="sidebar-sub-link" href="#">Mobile App Redesign</a></li>
+              <li><a class="sidebar-sub-link active" href="#">Web Dashboard v2</a></li>
+              <li><a class="sidebar-sub-link" href="#">Design System</a></li>
+              <li><a class="sidebar-sub-link" href="#">+ New Project</a></li>
+            </ul>
+
+            <button class="sidebar-expand-btn" id="expand-teams" aria-expanded="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="sidebar-label">Teams</span>
+              <svg class="sidebar-expand-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <!-- チームのサブメニュー -->
+            <ul class="sidebar-sub-list" id="sub-teams" role="list">
+              <li><a class="sidebar-sub-link" href="#">Design Team</a></li>
+              <li><a class="sidebar-sub-link" href="#">Engineering</a></li>
+              <li><a class="sidebar-sub-link" href="#">Product</a></li>
+            </ul>
+
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="sidebar-label">Documents</span>
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span class="sidebar-label">Settings</span>
+            </a>
+          </nav>
+          <div class="sidebar-demo-content">
+            <p style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">Overview</p>
+            <p>Nested items expand with a slide animation via max-height transition.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-nested">
+        <button class="copy-btn">Copy</button>
+        <pre><code>&lt;!-- 展開ボタン --&gt;
+&lt;button class="sidebar-expand-btn" id="expand-projects"&gt;
+  Projects
+  &lt;svg class="sidebar-expand-arrow" ...&gt;&lt;/svg&gt;
+&lt;/button&gt;
+&lt;!-- サブメニュー: max-height: 0 → 300px でアニメーション --&gt;
+&lt;ul class="sidebar-sub-list" id="sub-projects"&gt;
+  &lt;li&gt;&lt;a class="sidebar-sub-link" href="#"&gt;Project A&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a class="sidebar-sub-link active" href="#"&gt;Project B&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+  document.getElementById('expand-projects').addEventListener('click', function() {
+    this.classList.toggle('open');
+    document.getElementById('sub-projects').classList.toggle('open');
+  });
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         5. ミニサイドバー: アイコンのみ + ホバーツールチップ
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">5. Mini Sidebar (Icon Only)</span>
+        <button class="show-code-btn" data-target="code-mini">▶ Show Code</button>
+      </div>
+      <div class="demo-hint">Hover over icons to reveal tooltip labels.</div>
+      <div class="demo-block-body sidebar-demo">
+        <div class="sidebar-demo-container">
+          <nav class="mini-sidebar" aria-label="Mini icon sidebar">
+            <button class="mini-sidebar-btn active" data-tooltip="Dashboard" aria-label="Dashboard">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </button>
+            <button class="mini-sidebar-btn" data-tooltip="Users" aria-label="Users">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </button>
+            <button class="mini-sidebar-btn" data-tooltip="Projects" aria-label="Projects">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </button>
+            <button class="mini-sidebar-btn" data-tooltip="Messages" aria-label="Messages">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </button>
+            <button class="mini-sidebar-btn" data-tooltip="Analytics" aria-label="Analytics">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </button>
+            <div class="mini-sidebar-divider"></div>
+            <button class="mini-sidebar-btn" data-tooltip="Files" aria-label="Files">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            </button>
+            <button class="mini-sidebar-btn" data-tooltip="Notifications" aria-label="Notifications">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </button>
+            <div class="mini-sidebar-divider"></div>
+            <button class="mini-sidebar-btn" data-tooltip="Settings" aria-label="Settings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </button>
+          </nav>
+          <div class="sidebar-demo-content">
+            <p style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">Compact Mode</p>
+            <p>Icon-only sidebar maximizes content space. CSS ::after pseudo-element creates tooltips — no JavaScript needed.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-mini">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* ツールチップ: ::after 疑似要素で実装 (JS不要) */
+.mini-sidebar-btn::after {
+  content: attr(data-tooltip); /* data-tooltip 属性の値を取得 */
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gray-900);
+  color: #fff;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+.mini-sidebar-btn:hover::after { opacity: 1; }
+
+&lt;!-- HTML --&gt;
+&lt;button class="mini-sidebar-btn" data-tooltip="Dashboard"&gt;
+  &lt;svg ...&gt;&lt;/svg&gt;
+&lt;/button&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         6. 右サイドバー / ドロワー: 右からスライドイン
+         ====================================================== -->
+    <div class="demo-block">
+      <div class="demo-block-header">
+        <span class="demo-block-title">6. Right Sidebar / Drawer</span>
+        <button class="show-code-btn" data-target="code-drawer">▶ Show Code</button>
+      </div>
+      <div class="demo-block-body" style="padding:1.5rem;">
+        <div class="demo-drawer-container">
+          <!-- メインコンテンツ -->
+          <div class="demo-drawer-main">
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Click the button to open the right drawer panel.</p>
+            <button class="drawer-open-btn" id="open-drawer-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="15" y1="2" x2="15" y2="22"/></svg>
+              Open Drawer
+            </button>
+          </div>
+
+          <!-- ドロワーオーバーレイ -->
+          <div class="demo-drawer-overlay" id="drawer-overlay"></div>
+
+          <!-- 右ドロワー本体 -->
+          <aside class="demo-right-drawer" id="right-drawer" aria-label="Right drawer">
+            <div class="drawer-header">
+              <span class="drawer-title">Inspector</span>
+              <button class="drawer-close-btn" id="close-drawer-btn" aria-label="Close drawer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <!-- ドロワーコンテンツ: プロパティパネル例 -->
+            <a class="demo-sidebar-link active" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Properties
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Styles
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Prototype
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Comments
+            </a>
+            <div class="demo-sidebar-section">Layer</div>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Frame 1
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+              Ellipse 3
+            </a>
+            <a class="demo-sidebar-link" href="#">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Path 7
+            </a>
+          </aside>
+        </div>
+      </div>
+      <div class="code-snippet" id="code-drawer">
+        <button class="copy-btn">Copy</button>
+        <pre><code>/* 右ドロワー: transform で画面外から */
+.demo-right-drawer {
+  position: absolute;
+  top: 0; right: 0;
+  width: 260px; height: 100%;
+  transform: translateX(100%); /* 初期: 画面外(右) */
+  transition: transform var(--transition-slow);
+}
+.demo-right-drawer.open {
+  transform: translateX(0); /* スライドイン */
+}
+
+/* JS: openクラスを付け外しするだけ */
+openBtn.addEventListener('click', function() {
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+});
+closeBtn.addEventListener('click', function() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+});</code></pre>
+      </div>
+    </div>
+
+  </main><!-- /main-content -->
+</div><!-- /layout-wrapper -->
+
+<script src="../js/main.js"></script>
+<script>
+  /* ============================================================
+     Sidebars インタラクション
+     ============================================================ */
+
+  /* ---- 1. 折りたたみサイドバー ---- */
+  (function setupCollapsible() {
+    var sidebar = document.getElementById('collapsible-sidebar');
+    var btn = document.getElementById('sidebar-collapse-btn');
+    if (!sidebar || !btn) return;
+
+    btn.addEventListener('click', function() {
+      sidebar.classList.toggle('collapsed');
+      var isCollapsed = sidebar.classList.contains('collapsed');
+      btn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      btn.setAttribute('title',      isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    });
+  })();
+
+  /* ---- 2. ネストしたサブメニュー ---- */
+  (function setupNestedMenus() {
+    /* 汎用的に data-target でサブリストを指定 */
+    var expandBtns = [
+      { btn: 'expand-projects', sub: 'sub-projects' },
+      { btn: 'expand-teams',    sub: 'sub-teams'    }
+    ];
+
+    expandBtns.forEach(function(pair) {
+      var btn = document.getElementById(pair.btn);
+      var sub = document.getElementById(pair.sub);
+      if (!btn || !sub) return;
+
+      btn.addEventListener('click', function() {
+        var isOpen = btn.classList.contains('open');
+        btn.classList.toggle('open', !isOpen);
+        sub.classList.toggle('open', !isOpen);
+        btn.setAttribute('aria-expanded', !isOpen);
+      });
+    });
+  })();
+
+  /* ---- 3. ミニサイドバーのアクティブ切り替え ---- */
+  (function setupMiniSidebar() {
+    var btns = document.querySelectorAll('.mini-sidebar-btn');
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        btns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+  })();
+
+  /* ---- 4. 右ドロワー ---- */
+  (function setupDrawer() {
+    var openBtn  = document.getElementById('open-drawer-btn');
+    var closeBtn = document.getElementById('close-drawer-btn');
+    var drawer   = document.getElementById('right-drawer');
+    var overlay  = document.getElementById('drawer-overlay');
+    if (!openBtn || !closeBtn || !drawer || !overlay) return;
+
+    function openDrawer() {
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+    }
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      overlay.classList.remove('open');
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer); /* オーバーレイクリックで閉じる */
+
+    /* Escape キーで閉じる */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  })();
+</script>
+</body>
+</html>
